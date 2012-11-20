@@ -3,10 +3,11 @@ package xml;
 import java.util.ArrayList;
 
 public class Layout {
-	private int number, length, width;
+	private int number;
+	private double  length, width;
 	private ArrayList<MprFile> mprFiles;
 	
-	public Layout(int number, int length, int width) {
+	public Layout(int number, double length, double width) {
 		this.number = number;
 		this.length = length;
 		this.width = width;
@@ -17,11 +18,11 @@ public class Layout {
 		return number;
 	}
 	
-	public int getLength() {
+	public double getLength() {
 		return length;
 	}
 	
-	public int getWidth() {
+	public double getWidth() {
 		return width;
 	}
 	

@@ -23,6 +23,9 @@ public class XMLParser {
 	private static final String XML_LEFT_OFFSET = "Left";
 	private static final String XML_TOP_OFFSET = "Top";
 	private static final String XML_DESCRIPTION = "Description";
+	private static final String XML_PART_LENGTH = "Length";
+	private static final String XML_PART_WIDTH = "Width";
+
 
 	private String xmlFileName;
 	private Document document;
@@ -56,20 +59,26 @@ public class XMLParser {
 				int layoutNumber = Integer.parseInt(getTextValue(element, XML_LAYOUT_NUMBER));
 				String layoutLengthString = getTextValue(element, XML_LAYOUT_LENGTH).replaceAll("\\D", "");
 				String layoutWidthString = getTextValue(element, XML_LAYOUT_WIDTH).replaceAll("\\D", "");
-				int layoutLength = Integer.parseInt(layoutLengthString);
-				int layoutWidth = Integer.parseInt(layoutWidthString);
+				double layoutLength = Double.parseDouble(layoutLengthString);
+				double layoutWidth = Double.parseDouble(layoutWidthString);
 
 				Layout layout = new Layout(layoutNumber, layoutLength, layoutWidth);
 				NodeList layoutsNodeList = element.getElementsByTagName(XML_PART);
 				for (int j = 0; j < layoutsNodeList.getLength(); j++) {
 					Element layoutElement = (Element) layoutsNodeList.item(j);
-					String partCode = getTextValue(layoutElement, XML_PARTCODE);
+					String partCode = getTextValue(layoutElement, XML_PARTCODE).trim() + ".mpr";
 					String description = getTextValue(layoutElement, XML_DESCRIPTION);
 					String xOffsetString = getTextValue(layoutElement, XML_LEFT_OFFSET).replaceAll("\\D", "");
 					String yOffsetString = getTextValue(layoutElement, XML_TOP_OFFSET).replaceAll("\\D", "");
-					int xOffset = Integer.parseInt(xOffsetString);
-					int yOffset = Integer.parseInt(yOffsetString);
-					MprFile mprFile = new MprFile(partCode, description, xOffset, yOffset);
+					String partLengthString = getTextValue(layoutElement, XML_PART_LENGTH).replaceAll("\\D", "");
+					String partWidthString = getTextValue(layoutElement, XML_PART_WIDTH).replaceAll("\\D", "");
+					double xOffset = Double.parseDouble(xOffsetString);
+					double yOffset = Double.parseDouble(yOffsetString);
+					double partLength = Double.parseDouble(partLengthString);
+					double partWidth = Double.parseDouble(partWidthString);
+
+
+					MprFile mprFile = new MprFile(partCode, description, xOffset, yOffset, partLength, partWidth);
 					layout.addMprFile(mprFile);
 				}
 				layoutsList.add(layout);
@@ -100,7 +109,7 @@ public class XMLParser {
 			System.out.println("Layout #" + l.getNumber() + " L: " + l.getLength() + " W: " + l.getWidth());
 			for (MprFile file : l.getMprFiles()) {
 				System.out.println(file.getPartCode() + " | " + file.getDescription() + " | " + file.getXOffset()
-						+ " | " + file.getYOffset());
+						+ " | " + file.getYOffset()+ " | " + file.getLength()+ " | " + file.getWidth());
 			}
 			System.out.println();
 		}
