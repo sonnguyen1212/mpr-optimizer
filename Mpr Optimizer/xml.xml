@@ -1,0 +1,931 @@
+<?xml version="1.0" ?>
+<Root>
+   <Project_Info>
+       <Project_Number>1</Project_Number>
+       <Project_Name>Sample Job 1</Project_Name>
+       <Order_Number></Order_Number>
+       <Project_Description>Demonstration job</Project_Description>
+       <Project_Layouts_Count>4</Project_Layouts_Count>
+   </Project_Info>
+   <Layout>
+       <Number>1</Number>
+       <Length>2500 mm</Length>
+       <Width>2000 mm</Width>
+       <Material>MDF</Material>
+       <Panels_Required>1</Panels_Required>
+       <Saw_Width>4 mm</Saw_Width>
+       <Saw_Waste>~0.94 %</Saw_Waste>
+       <Usage>75.24 %</Usage>
+       <Offcut>23.79 %</Offcut>
+       <Scrap>0.00 %</Scrap>
+       <Description>MDF panel</Description>
+       <Notes> </Notes>
+       <Type>Panel</Type>
+       <LeftTrim>0 mm</LeftTrim>
+       <TopTrim>0 mm</TopTrim>
+       <RightTrim>0 mm</RightTrim>
+       <BottomTrim>0 mm</BottomTrim>
+       <PartsCount>9</PartsCount>
+       <OffcutsCount>2</OffcutsCount>
+       <Layout_Parts>
+           <Part>
+               <Number>5</Number>
+               <Left>0 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>764 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>1528 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>0 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>764 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>1528 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>0 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>764 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>1528 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+       </Layout_Parts>
+       <Layout_Offcuts>
+           <Offcut>
+               <Number>R1</Number>
+               <Left>0 mm</Left>
+               <Top>1662 mm</Top>
+               <Length>2288 mm</Length>
+               <Width>338 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+           <Offcut>
+               <Number>R2</Number>
+               <Left>2292 mm</Left>
+               <Top>0 mm</Top>
+               <Length>208 mm</Length>
+               <Width>2000 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+       </Layout_Offcuts>
+   </Layout>
+   <Layout>
+       <Number>2</Number>
+       <Length>2500 mm</Length>
+       <Width>2000 mm</Width>
+       <Material>MDF</Material>
+       <Panels_Required>1</Panels_Required>
+       <Saw_Width>4 mm</Saw_Width>
+       <Saw_Waste>~0.94 %</Saw_Waste>
+       <Usage>75.24 %</Usage>
+       <Offcut>23.79 %</Offcut>
+       <Scrap>0.00 %</Scrap>
+       <Description>MDF panel</Description>
+       <Notes> </Notes>
+       <Type>Panel</Type>
+       <LeftTrim>0 mm</LeftTrim>
+       <TopTrim>0 mm</TopTrim>
+       <RightTrim>0 mm</RightTrim>
+       <BottomTrim>0 mm</BottomTrim>
+       <PartsCount>9</PartsCount>
+       <OffcutsCount>2</OffcutsCount>
+       <Layout_Parts>
+           <Part>
+               <Number>5</Number>
+               <Left>0 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>764 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>5</Number>
+               <Left>1528 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10400</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>0 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>764 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>1528 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>0 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>764 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>1528 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+       </Layout_Parts>
+       <Layout_Offcuts>
+           <Offcut>
+               <Number>R1</Number>
+               <Left>0 mm</Left>
+               <Top>1662 mm</Top>
+               <Length>2288 mm</Length>
+               <Width>338 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+           <Offcut>
+               <Number>R2</Number>
+               <Left>2292 mm</Left>
+               <Top>0 mm</Top>
+               <Length>208 mm</Length>
+               <Width>2000 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+       </Layout_Offcuts>
+   </Layout>
+   <Layout>
+       <Number>3</Number>
+       <Length>2500 mm</Length>
+       <Width>2000 mm</Width>
+       <Material>MDF</Material>
+       <Panels_Required>1</Panels_Required>
+       <Saw_Width>4 mm</Saw_Width>
+       <Saw_Waste>~1.03 %</Saw_Waste>
+       <Usage>75.25 %</Usage>
+       <Offcut>22.63 %</Offcut>
+       <Scrap>0.91 %</Scrap>
+       <Description>MDF panel</Description>
+       <Notes> </Notes>
+       <Type>Panel</Type>
+       <LeftTrim>0 mm</LeftTrim>
+       <TopTrim>0 mm</TopTrim>
+       <RightTrim>0 mm</RightTrim>
+       <BottomTrim>0 mm</BottomTrim>
+       <PartsCount>11</PartsCount>
+       <OffcutsCount>3</OffcutsCount>
+       <Layout_Parts>
+           <Part>
+               <Number>4</Number>
+               <Left>0 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>764 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>1528 mm</Left>
+               <Top>0 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>4</Number>
+               <Left>0 mm</Left>
+               <Top>554 mm</Top>
+               <Length>760 mm</Length>
+               <Width>550 mm</Width>
+               <Partcode>P10391</Partcode>
+               <Description>Korpus1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>764 mm</Left>
+               <Top>554 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1332 mm</Left>
+               <Top>554 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1900 mm</Left>
+               <Top>554 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>0 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>568 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1136 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1704 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+       </Layout_Parts>
+       <Layout_Offcuts>
+           <Offcut>
+               <Number>R3</Number>
+               <Left>2292 mm</Left>
+               <Top>0 mm</Top>
+               <Length>208 mm</Length>
+               <Width>550 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+           <Offcut>
+               <Number>R4</Number>
+               <Left>0 mm</Left>
+               <Top>1641.5 mm</Top>
+               <Length>2500 mm</Length>
+               <Width>358.5 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+           <Offcut>
+               <Number>R5</Number>
+               <Left>2272 mm</Left>
+               <Top>1108 mm</Top>
+               <Length>228 mm</Length>
+               <Width>529.5 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+       </Layout_Offcuts>
+   </Layout>
+   <Layout>
+       <Number>4</Number>
+       <Length>2500 mm</Length>
+       <Width>2000 mm</Width>
+       <Material>MDF</Material>
+       <Panels_Required>1</Panels_Required>
+       <Saw_Width>4 mm</Saw_Width>
+       <Saw_Waste>~0.70 %</Saw_Waste>
+       <Usage>47.78 %</Usage>
+       <Offcut>51.44 %</Offcut>
+       <Scrap>0.00 %</Scrap>
+       <Description>MDF panel</Description>
+       <Notes> </Notes>
+       <Type>Panel</Type>
+       <LeftTrim>0 mm</LeftTrim>
+       <TopTrim>0 mm</TopTrim>
+       <RightTrim>0 mm</RightTrim>
+       <BottomTrim>0 mm</BottomTrim>
+       <PartsCount>8</PartsCount>
+       <OffcutsCount>2</OffcutsCount>
+       <Layout_Parts>
+           <Part>
+               <Number>6</Number>
+               <Left>0 mm</Left>
+               <Top>0 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>568 mm</Left>
+               <Top>0 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1136 mm</Left>
+               <Top>0 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1704 mm</Left>
+               <Top>0 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>0 mm</Left>
+               <Top>533.5 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>568 mm</Left>
+               <Top>533.5 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1136 mm</Left>
+               <Top>533.5 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+           <Part>
+               <Number>6</Number>
+               <Left>1704 mm</Left>
+               <Top>533.5 mm</Top>
+               <Length>564 mm</Length>
+               <Width>529.5 mm</Width>
+               <Partcode>P10410</Partcode>
+               <Description>Korpus1_1_1</Description>
+               <Notes></Notes>
+               <Group></Group>
+               <BandTop></BandTop>
+               <BandLeft></BandLeft>
+               <BandBottom></BandBottom>
+               <BandRight></BandRight>
+               <MarginLeft>0 mm</MarginLeft>
+               <MarginTop>0 mm</MarginTop>
+               <MarginRight>0 mm</MarginRight>
+               <MarginBottom>0 mm</MarginBottom>
+               <Works></Works>
+           </Part>
+       </Layout_Parts>
+       <Layout_Offcuts>
+           <Offcut>
+               <Number>R6</Number>
+               <Left>0 mm</Left>
+               <Top>1067 mm</Top>
+               <Length>2268 mm</Length>
+               <Width>933 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+           <Offcut>
+               <Number>R7</Number>
+               <Left>2272 mm</Left>
+               <Top>0 mm</Top>
+               <Length>228 mm</Length>
+               <Width>2000 mm</Width>
+               <Description></Description>
+               <Notes></Notes>
+           </Offcut>
+       </Layout_Offcuts>
+   </Layout>
+</Root>
