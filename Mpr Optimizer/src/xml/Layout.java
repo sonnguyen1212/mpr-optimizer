@@ -3,19 +3,19 @@ package xml;
 import java.util.ArrayList;
 
 public class Layout {
-	private int number;
+	private int layoutNumber;
 	private double  length, width;
 	private ArrayList<MprFile> mprFiles;
 	
 	public Layout(int number, double length, double width) {
-		this.number = number;
+		this.layoutNumber = number;
 		this.length = length;
 		this.width = width;
 		this.mprFiles = new ArrayList<>();
 	}
 	
 	public int getNumber() {
-		return number;
+		return layoutNumber;
 	}
 	
 	public double getLength() {
