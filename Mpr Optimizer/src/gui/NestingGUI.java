@@ -1,24 +1,46 @@
 package gui;
 
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.UnknownHostException;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import java.awt.Font;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JProgressBar;
-import javax.swing.JTextArea;
+import serial.License;
+import serial.LocalVerifier;
+import serial.RemoteVerifier;
+
 
 public class NestingGUI {
+
+	
+	private static final String LICENSE_FILE = "\\License\\license.data";
 
 	private JFrame frame;
 	private JMenuBar menuBar;
@@ -36,6 +58,7 @@ public class NestingGUI {
 	private JButton btnMprBrowse;
 	private JProgressBar progressBar;
 	private JTextArea txtrStatusBar;
+	private File homeFolder;
 
 	/**
 	 * Launch the application.
@@ -46,6 +69,8 @@ public class NestingGUI {
 				try {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
+					// window.remoteVerifyLicense();
+					window.localVerifyLicense();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -60,6 +85,97 @@ public class NestingGUI {
 		initialize();
 	}
 
+	
+	private void localVerifyLicense() {
+		LocalVerifier localVerifier = new LocalVerifier(homeFolder);
+		File license = new File(homeFolder.getAbsolutePath() + LICENSE_FILE);
+		String serial = "";
+		if (!license.exists()) {
+			try {
+				final JTextField macField = new JTextField();
+				JButton copyButton = new JButton("Copy Address To Clipboard");
+				copyButton.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						StringSelection clipBoard = new StringSelection(macField.getText());
+						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(clipBoard, null);
+					}
+				});
+				macField.setText(LocalVerifier.getCurrentMac());
+				macField.setEnabled(false);
+				final JTextField serialField = new JTextField();
+				final JComponent[] inputs = new JComponent[] {
+						new JLabel("Serial not found."),
+						new JLabel("Please send an e-mail with the following address:"),
+						macField, copyButton, 
+						new JLabel("Enter your serial:"),serialField};
+
+				JOptionPane.showMessageDialog(frame, inputs, "Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				serial = serialField.getText();
+			} catch (HeadlessException e) {
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+			localVerifier.createLicense(serial);
+			if (!localVerifier.verify()) {
+				JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+				System.exit(-1);
+			}
+		} else {
+			if (!localVerifier.verify()) {
+				JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+				System.exit(-1);
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void remoteVerifyLicense() {
+		try {
+			RemoteVerifier remoteVerifier = new RemoteVerifier();
+			File license = new File(LICENSE_FILE);
+			String serial = "";
+			if (!license.exists()) {
+				serial = JOptionPane.showInputDialog(frame, "Serial not found.\nPlease enter serial number:",
+						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				if (remoteVerifier.verify(serial) != 1) {
+					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+					System.exit(-1);
+				} else {
+					License serialObject = new License(serial);
+					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(license));
+					oos.writeObject(serialObject);
+					oos.close();
+				}
+			} else {
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(license));
+				License serialObject = (License) ois.readObject();
+				ois.close();
+				if (remoteVerifier.verify(serialObject.getSerial()) != 1) {
+					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+					System.exit(-1);
+				}
+
+			}
+
+		} catch (UnknownHostException e1) {
+			printErrorMessage("Couldn't resolve MAC Address");
+			e1.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void printErrorMessage(String message) {
+		JOptionPane.showMessageDialog(frame, message);
+	}
+	
 	/**
 	 * Set default values.
 	 */
@@ -75,6 +191,29 @@ public class NestingGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (InstantiationException e1) {
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e1) {
+			e1.printStackTrace();
+		}
+		String path = NestingGUI.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		String decodedPath = null;
+
+		try {
+			decodedPath = URLDecoder.decode(path, "UTF-8");
+			int lastOccurenceSlash = decodedPath.lastIndexOf("/");
+			decodedPath = decodedPath.substring(0, lastOccurenceSlash + 1);
+		} catch (UnsupportedEncodingException e2) {
+			e2.printStackTrace();
+		}
+		homeFolder = new File(decodedPath);
+		
 		frame = new JFrame("Netsing MPR Generator");
 		frame.setBounds(100, 100, 600, 500);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
