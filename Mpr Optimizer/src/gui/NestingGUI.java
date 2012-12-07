@@ -56,7 +56,6 @@ public class NestingGUI {
 	private JTextField mprPath;
 	private JButton btnXmlBrowse;
 	private JButton btnMprBrowse;
-	private JProgressBar progressBar;
 	private JTextArea txtrStatusBar;
 	private File homeFolder;
 
@@ -183,7 +182,6 @@ public class NestingGUI {
 		xmlFilePath.setText("");
 		mprPath.setText("");
 		btnGenerateNesting.setEnabled(false);
-		progressBar.setValue(0);
 		txtrStatusBar.setText("Status:");
 		frame.repaint();
 	}
@@ -306,10 +304,6 @@ public class NestingGUI {
 		});
 		btnMprBrowse.setBounds(461, 92, 117, 29);
 		frame.getContentPane().add(btnMprBrowse);
-		
-		progressBar = new JProgressBar();
-		progressBar.setBounds(20, 182, 558, 20);
-		frame.getContentPane().add(progressBar);
 		
 		txtrStatusBar = new JTextArea();
 		txtrStatusBar.setEditable(false);

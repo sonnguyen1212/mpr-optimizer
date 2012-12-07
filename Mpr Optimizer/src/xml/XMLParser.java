@@ -100,19 +100,4 @@ public class XMLParser {
 	public ArrayList<Layout> getLayouts() {
 		return layoutsList;
 	}
-
-	public static void main(String[] args) {
-		XMLParser parser = new XMLParser("xml.xml");
-		parser.parse();
-		ArrayList<Layout> layouts = parser.getLayouts();
-		for (Layout l : layouts) {
-			System.out.println("Layout #" + l.getNumber() + " L: " + l.getLength() + " W: " + l.getWidth());
-			for (MprFile file : l.getMprFiles()) {
-				System.out.println(file.getPartCode() + " | " + file.getDescription() + " | " + file.getXOffset()
-						+ " | " + file.getYOffset()+ " | " + file.getLength()+ " | " + file.getWidth());
-			}
-			System.out.println();
-		}
-
-	}
 }

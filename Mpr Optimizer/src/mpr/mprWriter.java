@@ -170,7 +170,7 @@ public class mprWriter {
 		}
 	}
 	
-	private boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)
+	private static boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)
 	{
 		//search and determine
 		return false;
