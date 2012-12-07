@@ -14,11 +14,14 @@ import xml.XMLParser;
 
 public class NestingCreator {
 	public Pattern mprLine = Pattern.compile("(\\w)=(\\w)");
-	public static final int PARAMETER_NAME = 0;
-	public static final int PARAMETER_VALUE = 1;
+	public static final int PARAMETER_NAME = 1;
+	public static final int PARAMETER_VALUE = 2;
 	public static final String[] supportedOps = {"<102 \\BohrVert\\", "<109 \\Nuten\\"};
 	public static final String vertTrimmingHeader ="<105 \\Konturfraesen\\";
 	public static final String horizBoring = "<103 \\BohrHoriz\\";
+	public static final String contourRegex = "]\\d+";
+	public static final String fileEnd = "!";
+	
 	
 	public static String PART_THICK = "DI";
 
@@ -36,6 +39,25 @@ public class NestingCreator {
 
 	public void createLayoutMprs (){
 		for (Layout currentLayout : layouts){
+			ArrayList<MprFile> mprs = currentLayout.getMprFiles();
+			ArrayList<String> currentPlateLines = new ArrayList<String>();
+			Point3D plateMeasurements;
+			try {
+				plateMeasurements = determinePlateMeasurements(currentLayout, mprs.get(0));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for (MprFile currentMpr:mprs)
+			{
+				File mprFile = mprWriter.findFile(currentMpr.getPartCode(), mprDirectory));
+				BufferedReader reader = new BufferedReader(new FileReader(mprFile));
+				ArrayList<String> header = new ArrayList<String>();
+				String currentLine;
+				while 
+				
+			}
+			
 			
 		}
 	}
