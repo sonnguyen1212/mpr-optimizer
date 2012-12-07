@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.Particle;
-
 import xml.Layout;
 import xml.MprFile;
 import xml.XMLParser;
@@ -18,6 +16,10 @@ public class NestingCreator {
 	public Pattern mprLine = Pattern.compile("(\\w)=(\\w)");
 	public static final int PARAMETER_NAME = 0;
 	public static final int PARAMETER_VALUE = 1;
+	public static final String[] supportedOps = {"<102 \\BohrVert\\", "<109 \\Nuten\\"};
+	public static final String vertTrimmingHeader ="<105 \\Konturfraesen\\";
+	public static final String horizBoring = "<103 \\BohrHoriz\\";
+	
 	public static String PART_THICK = "DI";
 
 	//private Layout currentLayout;`
