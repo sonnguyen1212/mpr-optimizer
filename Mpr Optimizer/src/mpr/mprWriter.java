@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class mprWriter {
 //empty constructor
@@ -86,5 +87,12 @@ public class mprWriter {
 		if(printWriter != null) {
 			printWriter.close();
 		}
+	}
+	
+	public Pattern mprLine = Pattern.compile("(\\w)=(\\w)");
+
+	public static void addOffsetToOperation (ArrayList<String> lines , String xOffset, String yOffset)
+	{
+		
 	}
 }
