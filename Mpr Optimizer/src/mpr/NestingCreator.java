@@ -2,6 +2,7 @@ package mpr;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class NestingCreator {
 	public Pattern mprLine = Pattern.compile("(\\w)=(\\w)");
 	public static final int PARAMETER_NAME = 1;
 	public static final int PARAMETER_VALUE = 2;
+	public static final String partDimens = "<100 \\WerkStck\\";
 	public static final String[] supportedOps = {"<102 \\BohrVert\\", "<109 \\Nuten\\"};
 	public static final String vertTrimmingHeader ="<105 \\Konturfraesen\\";
 	public static final String horizBoring = "<103 \\BohrHoriz\\";
@@ -37,7 +39,7 @@ public class NestingCreator {
 		this.mprDirectory = mprDirectory;
 	}
 
-	public void createLayoutMprs (){
+	public void createLayoutMprs () throws IOException{
 		for (Layout currentLayout : layouts){
 			ArrayList<MprFile> mprs = currentLayout.getMprFiles();
 			ArrayList<String> currentPlateLines = new ArrayList<String>();
@@ -50,16 +52,110 @@ public class NestingCreator {
 			}
 			for (MprFile currentMpr:mprs)
 			{
-				File mprFile = mprWriter.findFile(currentMpr.getPartCode(), mprDirectory));
-				BufferedReader reader = new BufferedReader(new FileReader(mprFile));
+				File mprFile = mprWriter.findFile(currentMpr.getPartCode(), mprDirectory);
+				BufferedReader reader = null;;
+				try {
+					reader = new BufferedReader(new FileReader(mprFile));
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				ArrayList<String> header = new ArrayList<String>();
-				String currentLine;
-				while 
+				ArrayList<String> contours = new ArrayList<>();
+				ArrayList<String> operations = new ArrayList<>();
+
+				String currentLine = null;
+
+				while (reader.ready())
+				{
+					currentLine = reader.readLine();
+					if (!currentLine.matches(contourRegex) && !isOperation(currentLine)){
+						header.add(currentLine);
+					}
+					else
+						break;
+				}
+				if (currentLine.matches(contourRegex)){
+					while (reader.ready() && !isOperation(currentLine))
+					{
+						contours.add(currentLine);
+						currentLine = reader.readLine();
+					}
+				}
+				while (reader.ready() && !currentLine.matches(fileEnd))
+				{
+					operations.add(currentLine);
+					currentLine = reader.readLine();
+				}
 				
+				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations);
+				if (!contours.isEmpty())
+				{
+					ArrayList<ArrayList<String>> contoursBreaked = breakContours(contours);
+
+				}
 			}
 			
 			
 		}
+	}
+	private ArrayList<ArrayList<String>> breakToOperations (ArrayList<String> allOperations){
+		ArrayList<ArrayList<String>> operationsBreaked = new ArrayList<ArrayList<String>>();
+		ArrayList<String> currentOp = null;
+		for (String line: allOperations)
+		{
+			if (!isOperation(line))
+			{
+				currentOp.add(line);
+			}
+			else
+			{
+				if (currentOp== null)
+				{
+					currentOp = new ArrayList<String>();
+				}
+				else
+				{
+					operationsBreaked.add(currentOp);
+					currentOp = new ArrayList<String>();					
+				}
+			}
+		}
+		return operationsBreaked;
+	}
+	
+	private ArrayList<ArrayList<String>> breakContours (ArrayList<String> allContours){
+		ArrayList<ArrayList<String>> contoursBreaked = new ArrayList<ArrayList<String>>();
+		ArrayList<String> currentContour = null;
+		for (String line: allContours)
+		{
+			if (!line.matches(contourRegex))
+			{
+				currentContour.add(line);
+			}
+			else
+			{
+				if (currentContour== null)
+				{
+					currentContour = new ArrayList<String>();
+				}
+				else
+				{
+					contoursBreaked.add(currentContour);
+					currentContour = new ArrayList<String>();					
+				}
+			}
+		}
+		return contoursBreaked;
+	}
+	
+	
+	private boolean isOperation(String currentLine)
+	{
+		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])&& !currentLine.matches(supportedOps[0]))
+				return false;
+		else
+			return true;
 	}
 
 	private Point3D determinePlateMeasurements(Layout currentLayout, MprFile firstFile) throws IOException

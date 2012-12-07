@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import xml.MprFile;
+
 public class mprWriter {
 	// empty constructor
 	public static final String PLATE_DIRECTORY = "Nesting_Mprs";
@@ -166,5 +168,11 @@ public class mprWriter {
 				}
 			}
 		}
+	}
+	
+	private boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)
+	{
+		//search and determine
+		return false;
 	}
 }
