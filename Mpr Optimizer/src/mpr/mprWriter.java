@@ -101,23 +101,70 @@ public class mprWriter {
 			String xOffset, String yOffset) {
 		for (String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
-			if(mprMatcher.find()) {
-				for(int i=0;i<xParameters.length;i++) {
-					if(mprMatcher.group(NestingCreator.PARAMETER_NAME).equals(xParameters[i])) {
-						line = xParameters[i] + "\"" + mprMatcher.group(NestingCreator.PARAMETER_VALUE) + xOffset + "\"\n\r";
+			if (mprMatcher.find()) {
+				for (int i = 0; i < xParameters.length; i++) {
+					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals(
+							xParameters[i])) {
+						line = xParameters[i]
+								+ "\""
+								+ mprMatcher
+										.group(NestingCreator.PARAMETER_VALUE)
+								+ xOffset + "\"\n\r";
 						break;
 					}
 				}
-				for(int i=0;i<yParameters.length;i++) {
-					if(mprMatcher.group(NestingCreator.PARAMETER_NAME).equals(yParameters[i])) {
-						line = yParameters[i] + "\"" + mprMatcher.group(NestingCreator.PARAMETER_VALUE) + yOffset + "\"\n\r";
+				for (int i = 0; i < yParameters.length; i++) {
+					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals(
+							yParameters[i])) {
+						line = yParameters[i]
+								+ "\""
+								+ mprMatcher
+										.group(NestingCreator.PARAMETER_VALUE)
+								+ yOffset + "\"\n\r";
 						break;
 					}
 				}
 			}
 		}
 	}
-	public static void flipXY (ArrayList<String> lines){
-		
+
+	public static void flipXY(ArrayList<String> lines, String yLen) {
+		String oldXA = "", oldYA = "", oldXE = "", oldYE = "";
+		for (String line : lines) {
+			Matcher mprMatcher = mprLine.matcher(line);
+			if (mprMatcher.find()) {
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("XA")) {
+					oldXA = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("XE")) {
+					oldXE = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("YA")) {
+					oldYA = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("YE")) {
+					oldYE = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+				}
+			}
+		}
+		for(String line : lines) {
+			Matcher mprMatcher = mprLine.matcher(line);
+			if (mprMatcher.find()) {
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("XA")) {
+					line = "XA=\"" + yLen + "-(" + oldYA + ")\"";
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("XE")) {
+					line = "XE=\"" + yLen + "-(" + oldYE + ")\"";
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("YA")) {
+					line = "YA=\"" + oldXA + "\"";
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
+						.equals("YE")) {
+					line = "YE=\"" + oldXE + "\"";
+				}
+			}
+		}
 	}
 }
