@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class mprWriter {
-//empty constructor
+	//empty constructor
 	public static final String PLATE_DIRECTORY = "Nesting_Mprs";
 	public static final String LEFT_OVER = "LeftOvers_Mprs";
-	
+
 	//search recursively the given file name in the directory, if found return a File object of it,
 	//if not - return NULL;
 	public static File findFile(String fileName, String sourceDirectory)
@@ -33,7 +33,7 @@ public class mprWriter {
 		}
 		return null;
 	}
-	
+
 	//this method will recieve the dimensios of the plate, and the lines to add to it, it will generate
 	//the header of the document and concat it to the lines given and will write the file to the PLATE_DIRECFORY
 	public static void createPlateMpr(Point3D dimensions, ArrayList<String> lines, String name){
@@ -58,7 +58,7 @@ public class mprWriter {
 		}
 		fileWriter(PLATE_DIRECTORY + File.separator + name, headerLines);
 	}
-	
+
 	//this method will recieve all the neccaserry lines for the this mpr, and will write it to the
 	//LEFT_OVER directory.
 	public static void createLeftOverMpr(ArrayList<String> lines, String name){
@@ -68,7 +68,7 @@ public class mprWriter {
 		}
 		fileWriter(LEFT_OVER + File.separator + name, lines);
 	}
-	
+
 	//this method will be used by the two methods above, it will open the stream and write the files.
 	private static void fileWriter (String destination , ArrayList<String> lines)
 	{
@@ -88,11 +88,13 @@ public class mprWriter {
 			printWriter.close();
 		}
 	}
-	
+
 	public Pattern mprLine = Pattern.compile("(\\w)=(\\w)");
+	public static final String[] xParameters = {"XA" , "XE"};
+	public static final String[] yParameters = {"YA" , "YE"};
 
 	public static void addOffsetToOperation (ArrayList<String> lines , String xOffset, String yOffset)
 	{
-		
+
 	}
 }
