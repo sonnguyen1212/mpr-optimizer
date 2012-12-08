@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,8 +24,8 @@ public class NestingCreator {
 	public static final String horizBoring = "<103 \\BohrHoriz\\";
 	public static final String contourRegex = "]\\d+";
 	public static final String fileEnd = "!";
-	
-	
+
+
 	public static String PART_THICK = "DI";
 
 	//private Layout currentLayout;`
@@ -87,16 +88,27 @@ public class NestingCreator {
 					operations.add(currentLine);
 					currentLine = reader.readLine();
 				}
-				
+
 				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations);
 				if (!contours.isEmpty())
 				{
 					ArrayList<ArrayList<String>> contoursBreaked = breakContours(contours);
-
+					ArrayList<String> vertMilling = extractSpecificOpType(operationsBreaked, vertTrimmingHeader);
 				}
+
+				//createLeftOverMPR
+				ArrayList<String> unSupportedOps = extractSpecificOpType(operationsBreaked, horizBoring);
+				if (unSupportedOps!= null){
+					header.addAll(unSupportedOps);
+					header.add(fileEnd);
+					String fileName = currentMpr.getPartCode();
+					mprWriter.createLeftOverMpr(header, fileName); 
+				}
+				
+				
 			}
-			
-			
+
+
 		}
 	}
 	private ArrayList<ArrayList<String>> breakToOperations (ArrayList<String> allOperations){
@@ -123,7 +135,7 @@ public class NestingCreator {
 		}
 		return operationsBreaked;
 	}
-	
+
 	private ArrayList<ArrayList<String>> breakContours (ArrayList<String> allContours){
 		ArrayList<ArrayList<String>> contoursBreaked = new ArrayList<ArrayList<String>>();
 		ArrayList<String> currentContour = null;
@@ -148,14 +160,35 @@ public class NestingCreator {
 		}
 		return contoursBreaked;
 	}
-	
-	
+
+
 	private boolean isOperation(String currentLine)
 	{
 		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])&& !currentLine.matches(supportedOps[0]))
-				return false;
+			return false;
 		else
 			return true;
+	}
+
+	private ArrayList<String> extractSpecificOpType (ArrayList<ArrayList<String>> operationsBreaked, String regex)
+	{
+		ArrayList<String> operationType = new ArrayList<>();
+		ArrayList<String> currentOp;
+		Iterator<ArrayList<String>> iterator  = operationsBreaked.iterator();
+
+		while (iterator.hasNext())
+		{
+			currentOp = iterator.next();
+			if (currentOp.get(0).matches(regex))
+			{
+				operationsBreaked.remove(currentOp);
+				operationType.addAll(currentOp); 
+			}
+		}
+		if (operationType.isEmpty())
+			return null;
+		else
+			return operationType;
 	}
 
 	private Point3D determinePlateMeasurements(Layout currentLayout, MprFile firstFile) throws IOException
