@@ -40,6 +40,7 @@ public class NestingCreator {
 
 	public NestingCreator(String xmlFile, String mprDirectory){
 		parser = new XMLParser(xmlFile);
+		parser.parse();
 		layouts = parser.getLayouts();
 		this.mprDirectory = mprDirectory;
 	}
