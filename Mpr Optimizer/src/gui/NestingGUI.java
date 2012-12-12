@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -30,6 +31,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import mpr.NestingCreator;
 
 import serial.License;
 import serial.LocalVerifier;
@@ -57,6 +61,8 @@ public class NestingGUI {
 	private JButton btnMprBrowse;
 	private JTextArea txtrStatusBar;
 	private File homeFolder;
+	private boolean isXMLFileSelected;
+	private boolean isMPRDestDirSelected;
 
 	/**
 	 * Launch the application.
@@ -210,8 +216,9 @@ public class NestingGUI {
 			e2.printStackTrace();
 		}
 		homeFolder = new File(decodedPath);
-		
-		frame = new JFrame("Netsing MPR Generator");
+		isMPRDestDirSelected = false;
+		isXMLFileSelected = false;
+		frame = new JFrame("Nesting MPR Generator");
 		frame.setBounds(100, 100, 600, 500);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -275,6 +282,13 @@ public class NestingGUI {
 		btnGenerateNesting.setEnabled(false);
 		btnGenerateNesting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				NestingCreator nestingCreator = new NestingCreator(xmlFilePath.getText(), mprPath.getText());
+				try {
+					nestingCreator.createLayoutMprs();
+					txtrStatusBar.setText("Status: Processing..");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnGenerateNesting.setBounds(246, 141, 139, 29);
@@ -293,12 +307,44 @@ public class NestingGUI {
 		frame.getContentPane().add(mprPath);
 		
 		btnXmlBrowse = new JButton("Browse");
+		btnXmlBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser(homeFolder);
+				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				FileNameExtensionFilter xmlExtensionFilter = new FileNameExtensionFilter("XML File (*.xml)", "xml");
+				fileChooser.setFileFilter(xmlExtensionFilter);
+				fileChooser.setDialogTitle("Choose your file:");
+				fileChooser.setBounds(6, 6, 550, 400);
+				int result = fileChooser.showOpenDialog(frame);
+				if(result == JFileChooser.APPROVE_OPTION) {
+					File selectedXML = fileChooser.getSelectedFile();
+					xmlFilePath.setText(selectedXML.getAbsolutePath());
+					isXMLFileSelected = true;
+					if(isMPRDestDirSelected) {
+						btnGenerateNesting.setEnabled(true);
+					}
+				}
+			}
+		});
 		btnXmlBrowse.setBounds(461, 40, 117, 29);
 		frame.getContentPane().add(btnXmlBrowse);
 		
 		btnMprBrowse = new JButton("Browse");
 		btnMprBrowse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser(homeFolder);
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fileChooser.setDialogTitle("Choose your destionation folder:");
+				fileChooser.setBounds(6, 6, 550, 400);
+				int result = fileChooser.showOpenDialog(frame);
+				if(result == JFileChooser.APPROVE_OPTION) {
+					File selectedDir = fileChooser.getSelectedFile();
+					mprPath.setText(selectedDir.getAbsolutePath());
+					isMPRDestDirSelected = true;
+					if(isXMLFileSelected) {
+						btnGenerateNesting.setEnabled(true);
+					}
+				}
 			}
 		});
 		btnMprBrowse.setBounds(461, 92, 117, 29);

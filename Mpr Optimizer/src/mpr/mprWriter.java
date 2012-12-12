@@ -14,8 +14,8 @@ public class mprWriter {
 	public static final String PLATE_DIRECTORY = "Nesting_Mprs";
 	public static final String LEFT_OVER = "LeftOvers_Mprs";
 	public static Pattern mprLine = Pattern.compile("(\\w)=(\"\\w\")");
-	public static final String[] xParameters = { "XA", "XE" };
-	public static final String[] yParameters = { "YA", "YE" };
+	public static final String[] xParameters = { "XA", "XE", "X" };
+	public static final String[] yParameters = { "YA", "YE", "Y" };
 
 	// search recursively the given file name in the directory, if found return
 	// a File object of it,
@@ -172,6 +172,21 @@ public class mprWriter {
 	
 	public static boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)
 	{
+		for(String line: header) {
+			if(line.toUpperCase().equals("LA")) {
+				Matcher mprMatcher = mprLine.matcher(line);
+				if(mprMatcher.find()) {
+					String valueString = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+					double valueDouble = Double.parseDouble(valueString);
+					if(Math.abs(valueDouble) - currentMpr.getLength() < 0.01) {
+						return false;
+					}
+					else {
+						return true;
+					}
+				}
+			}
+		}
 		//search and determine
 		return false;
 	}
