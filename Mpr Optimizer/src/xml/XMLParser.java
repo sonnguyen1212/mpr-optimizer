@@ -1,5 +1,6 @@
 package xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -41,7 +42,7 @@ public class XMLParser {
 
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			document = db.parse(xmlFileName);
+			document = db.parse(new File(xmlFileName));
 
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
@@ -55,6 +56,7 @@ public class XMLParser {
 		NodeList rootNodesList = docEle.getElementsByTagName(XML_LAYOUT);
 		if (rootNodesList != null && rootNodesList.getLength() > 0) {
 			for (int i = 0; i < rootNodesList.getLength(); i++) {
+				System.out.println("Layout " + i);
 				Element element = (Element) rootNodesList.item(i);
 				int layoutNumber = Integer.parseInt(getTextValue(element, XML_LAYOUT_NUMBER));
 				String layoutLengthString = getTextValue(element, XML_LAYOUT_LENGTH).replaceAll("\\D", "");
@@ -65,6 +67,7 @@ public class XMLParser {
 				Layout layout = new Layout(layoutNumber, layoutLength, layoutWidth);
 				NodeList layoutsNodeList = element.getElementsByTagName(XML_PART);
 				for (int j = 0; j < layoutsNodeList.getLength(); j++) {
+					System.out.println("-Part " + j);
 					Element layoutElement = (Element) layoutsNodeList.item(j);
 					String partCode = getTextValue(layoutElement, XML_PARTCODE).trim() + ".mpr";
 					String description = getTextValue(layoutElement, XML_DESCRIPTION);
