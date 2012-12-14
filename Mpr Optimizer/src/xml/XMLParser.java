@@ -1,6 +1,12 @@
 package xml;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -26,6 +32,7 @@ public class XMLParser {
 	private static final String XML_DESCRIPTION = "Description";
 	private static final String XML_PART_LENGTH = "Length";
 	private static final String XML_PART_WIDTH = "Width";
+	private static final String XML_REPLACEMENT_HEADER = "<?xml version=\"1.0\" encoding=\"Cp1252\"?>";
 
 
 	private String xmlFileName;
@@ -39,10 +46,11 @@ public class XMLParser {
 
 	public void parse() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
+		File newFile = null;
 		try {
+			newFile = replaceHeader(xmlFileName);
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			document = db.parse(new File(xmlFileName));
+			document = db.parse(new FileInputStream(newFile), "Cp1252");
 
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
@@ -87,6 +95,9 @@ public class XMLParser {
 				layoutsList.add(layout);
 			}
 		}
+		if(newFile != null) {
+			newFile.delete();
+		}
 	}
 
 	private String getTextValue(Element element, String tagName) {
@@ -100,6 +111,29 @@ public class XMLParser {
 		return textVal;
 	}
 
+	private File replaceHeader(String xmlFile) {
+		File newFile = new File(xmlFile + "temp.xml");
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(xmlFile)));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(newFile));
+			writer.write(XML_REPLACEMENT_HEADER + "\n\r", 0, (XML_REPLACEMENT_HEADER + "\n\r").length());
+			reader.readLine();
+			String line = "";
+			while((line = reader.readLine()) != null) {
+				writer.write(line, 0, line.length());
+			}
+			writer.close();
+			reader.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return newFile;
+	}
+	
 	public ArrayList<Layout> getLayouts() {
 		return layoutsList;
 	}
