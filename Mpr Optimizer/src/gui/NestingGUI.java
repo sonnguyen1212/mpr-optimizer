@@ -355,6 +355,10 @@ public class NestingGUI {
 		txtrStatusBar.setText("Status");
 		txtrStatusBar.setBounds(20, 228, 558, 201);
 		frame.getContentPane().add(txtrStatusBar);
+		
+		xmlFilePath.setText("c:\\\\test\\\\xml.xml");
+		mprPath.setText("c:\\\\test\\\\mpr\\\\");
+		btnGenerateNesting.setEnabled(true);
 	}
 
 

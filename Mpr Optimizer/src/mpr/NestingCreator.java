@@ -15,16 +15,16 @@ import xml.MprFile;
 import xml.XMLParser;
 
 public class NestingCreator {
-	public Pattern mprLine = Pattern.compile("(\\w)=(\\w)");
+	public Pattern mprLine = Pattern.compile("(\\w+)=\"(\\w+)\"");
 	public static final int PARAMETER_NAME = 1;
 	public static final int PARAMETER_VALUE = 2;
-	public static final String partDimens = "<100 \\WerkStck\\";
-	public static final String[] supportedOps = {"<102 \\BohrVert\\", "<109 \\Nuten\\"};
-	public static final String vertTrimmingHeader ="<105 \\Konturfraesen\\";
-	public static final String horizBoring = "<103 \\BohrHoriz\\";
+	public static final String partDimens = "<100 \\\\WerkStck\\\\";
+	public static final String[] supportedOps = {"<102 \\\\BohrVert\\\\", "<109 \\\\Nuten\\\\"};
+	public static final String vertTrimmingHeader ="<105 \\\\Konturfraesen\\\\";
+	public static final String horizBoring = "<103 \\\\BohrHoriz\\\\";
 	public static final String contourRegex = "](\\d+)";
-	public static final String contourElementRegex = "$\\d";
-	public static final String millingOperationRegex = "(\\d+=\")(\\d+)(:\\d+\")";
+	public static final String contourElementRegex = "$\\d+";
+	public static final String millingOperationRegex = "(\\w+=\")(\\d+)(:\\d+\")";
 
 
 	public static final String fileEnd = "!";
@@ -116,24 +116,24 @@ public class NestingCreator {
 					ArrayList<ArrayList<String>> vertMilling = extractSpecificOpType(operationsBreaked, vertTrimmingHeader);
 					if (contoursBreaked.size() != vertMilling.size())
 						System.out.println("ERROR!!! Contouring and milling not the same size at file :" + currentMpr.getPartCode());
-					
+
 					updateIndexesContours(contoursBreaked, currentContourIndex);
 					updateIndexesMilling(vertMilling, currentContourIndex);
 					currentContourIndex += contoursBreaked.size();
-					
+
 					for (ArrayList<String> contour : contoursBreaked){
 						ArrayList<ArrayList<String>> currentContourBreaked = breakContours(contour, contourElementRegex);
 						if (xOffset>0 || yOffset>0)
 							for (ArrayList<String> contourElement : currentContourBreaked)
 								mprWriter.addOffsetToOperation(contourElement, Double.toString(xOffset), Double.toString(yOffset));
-						
+
 						if (shouldFlip)
 							for (ArrayList<String> contourElement : currentContourBreaked)
 								mprWriter.flipXY(contourElement, Double.toString(currentMpr.getLength()));
 						contour = new ArrayList<String>();
 						uniteArrayLists(currentContourBreaked, contour);
 					}
-					
+
 					uniteArrayLists(vertMilling, currentPlateMillings);
 					uniteArrayLists(contoursBreaked, currentPlateContours);
 
@@ -148,7 +148,7 @@ public class NestingCreator {
 					mprWriter.createLeftOverMpr(header, fileName); 
 				}
 
-				
+
 				//add relevant plate lines
 				for (ArrayList<String> operation : operationsBreaked){
 					if (xOffset>0 || yOffset>0)
@@ -158,7 +158,7 @@ public class NestingCreator {
 				}
 				uniteArrayLists(operationsBreaked, currentPlateOperations);
 			}
-			
+
 			//createPlateFile:
 			ArrayList<String> allPlateLines = new ArrayList<>();
 			allPlateLines.addAll(currentPlateContours);
@@ -168,7 +168,7 @@ public class NestingCreator {
 
 		}
 	}
-	
+
 	private void updateIndexesContours(ArrayList<ArrayList<String>> contours, int currentPlateIndex){
 		String currentLine = null;
 		Pattern patt = Pattern.compile(contourRegex);
@@ -177,33 +177,43 @@ public class NestingCreator {
 		{
 			currentLine = contours.get(i).get(0);
 			matcher = patt.matcher(currentLine);
+			matcher.find();
 			int index = Integer.parseInt(matcher.group(1));
 			index+= currentPlateIndex;
 			currentLine = "]" + index; //\n\r?????
+			contours.get(i).set(0, currentLine);// = currentLine;
 		}
-	}
 	
+	}
+
 	private void updateIndexesMilling(ArrayList<ArrayList<String>> millings, int currentPlateIndex){
 		Pattern patt = Pattern.compile(millingOperationRegex);
 		Matcher matcher;
-		for (ArrayList<String> currentMill : millings){
-			for (String currentLine :currentMill){
+		String currentLine;
+		for (ArrayList<String> currentMill : millings)
+		{
+			for (int line=0 ; line<currentMill.size() ; line++)
+			{
+				currentLine = currentMill.get(line);
 				matcher = patt.matcher(currentLine);
 				if (matcher.find())
 				{
 					int index = Integer.parseInt(matcher.group(2));
 					index+= currentPlateIndex;
-					currentLine =  matcher.group(1) + index + matcher.group(2); //\n\r?????
+					currentLine =  matcher.group(1) + index + matcher.group(3); //\n\r?????
+					//currentMill.set(lineCounter, currentLine); //??????????
+					currentMill.set(line, currentLine);
 				}
+				//lineCounter++;
 			}
 		}
-		
+
 	}
-	
-	
+
+
 	private ArrayList<ArrayList<String>> breakToOperations (ArrayList<String> allOperations){
 		ArrayList<ArrayList<String>> operationsBreaked = new ArrayList<ArrayList<String>>();
-		ArrayList<String> currentOp = null;
+		ArrayList<String> currentOp =  new ArrayList<String>();
 		for (String line: allOperations)
 		{
 			if (!isOperation(line))
@@ -212,23 +222,22 @@ public class NestingCreator {
 			}
 			else
 			{
-				if (currentOp== null)
-				{
-					currentOp = new ArrayList<String>();
-				}
-				else
-				{
+				if (!currentOp.isEmpty())
 					operationsBreaked.add(currentOp);
-					currentOp = new ArrayList<String>();					
-				}
+				currentOp = new ArrayList<String>();
+				currentOp.add(line);
+
 			}
+
 		}
+		if (!currentOp.isEmpty())
+			operationsBreaked.add(currentOp);
 		return operationsBreaked;
 	}
 
 	private ArrayList<ArrayList<String>> breakContours (ArrayList<String> allContours, String regex){
 		ArrayList<ArrayList<String>> contoursBreaked = new ArrayList<ArrayList<String>>();
-		ArrayList<String> currentContour = null;
+		ArrayList<String> currentContour = new ArrayList<String>();
 		for (String line: allContours)
 		{
 			if (!line.matches(regex))
@@ -237,17 +246,16 @@ public class NestingCreator {
 			}
 			else
 			{
-				if (currentContour== null)
-				{
-					currentContour = new ArrayList<String>();
-				}
-				else
-				{
+				if (!currentContour.isEmpty())
 					contoursBreaked.add(currentContour);
-					currentContour = new ArrayList<String>();					
-				}
+				currentContour = new ArrayList<String>();
+				currentContour.add(line);
+
+
 			}
 		}
+		if (!currentContour.isEmpty())
+			contoursBreaked.add(currentContour);
 		return contoursBreaked;
 	}
 
@@ -259,25 +267,45 @@ public class NestingCreator {
 
 	private boolean isOperation(String currentLine)
 	{
-		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])&& !currentLine.matches(supportedOps[0]))
+		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])&& !currentLine.matches(supportedOps[1]))
 			return false;
 		else
 			return true;
 	}
 
 	private ArrayList<ArrayList<String>> extractSpecificOpType (ArrayList<ArrayList<String>> operationsBreaked, String regex)
+//	{
+//		ArrayList<ArrayList<String>> operationType = new ArrayList<>();
+//		ArrayList<String> currentOp;
+//		Iterator<ArrayList<String>> iterator  = operationsBreaked.iterator();
+//
+//		while (iterator.hasNext())
+//		{
+//			currentOp = iterator.next();
+//			if (currentOp.get(0).matches(regex))
+//			{
+//				operationType.add(currentOp); 
+//			//	iterator.remove();
+//			}
+//		}
+//		if (operationType.isEmpty())
+//			return null;
+//		else
+//			return operationType;
+//	}
 	{
 		ArrayList<ArrayList<String>> operationType = new ArrayList<>();
-		ArrayList<String> currentOp;
-		Iterator<ArrayList<String>> iterator  = operationsBreaked.iterator();
+		//ArrayList<String> currentOp;
+		//Iterator<ArrayList<String>> iterator  = operationsBreaked.iterator();
 
-		while (iterator.hasNext())
+		for (int i=0 ; i<operationsBreaked.size() ; i++)
 		{
-			currentOp = iterator.next();
-			if (currentOp.get(0).matches(regex))
+			//currentOp = iterator.next();
+			if (operationsBreaked.get(i).get(0).matches(regex))
 			{
-				operationsBreaked.remove(currentOp);
-				operationType.add(currentOp); 
+				operationType.add(operationsBreaked.get(i)); 
+				operationsBreaked.remove(i);
+				i--;
 			}
 		}
 		if (operationType.isEmpty())
@@ -285,7 +313,6 @@ public class NestingCreator {
 		else
 			return operationType;
 	}
-
 	private Point3D determinePlateMeasurements(Layout currentLayout, MprFile firstFile) throws IOException
 	{
 		double length = currentLayout.getLength();
@@ -303,10 +330,11 @@ public class NestingCreator {
 				match = mprLine.matcher(currentLine);
 				if (match.find())
 				{
-					if (match.group(PARAMETER_NAME).equals("DI"))
+					System.out.println(match.group(PARAMETER_NAME).matches("DI"));
+					if (match.group(PARAMETER_NAME).matches("DI"))
 					{
 						thickness = match.group(PARAMETER_VALUE);
-						thickness = thickness.replaceAll("\"", "");
+						//thickness = thickness.replaceAll("\\\\", "");
 						break;
 					}
 				}
