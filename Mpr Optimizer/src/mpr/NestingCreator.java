@@ -26,10 +26,7 @@ public class NestingCreator {
 	public static final String contourElementRegex = "\\$E\\d+";
 	public static final String millingOperationRegex = "(\\w+=\")(\\d+)(:\\d+\")";
 
-
 	public static final String fileEnd = "!";
-
-
 	public static String PART_THICK = "DI";
 
 	//private Layout currentLayout;`
@@ -52,7 +49,6 @@ public class NestingCreator {
 			ArrayList<String> currentPlateContours = new ArrayList<String>();
 			ArrayList<String> currentPlateOperations = new ArrayList<String>();
 			ArrayList<String> currentPlateMillings = new ArrayList<String>();
-
 
 			Point3D plateMeasurements = null;
 			try {
@@ -280,33 +276,10 @@ public class NestingCreator {
 	}
 
 	private ArrayList<ArrayList<String>> extractSpecificOpType (ArrayList<ArrayList<String>> operationsBreaked, String regex)
-//	{
-//		ArrayList<ArrayList<String>> operationType = new ArrayList<>();
-//		ArrayList<String> currentOp;
-//		Iterator<ArrayList<String>> iterator  = operationsBreaked.iterator();
-//
-//		while (iterator.hasNext())
-//		{
-//			currentOp = iterator.next();
-//			if (currentOp.get(0).matches(regex))
-//			{
-//				operationType.add(currentOp); 
-//			//	iterator.remove();
-//			}
-//		}
-//		if (operationType.isEmpty())
-//			return null;
-//		else
-//			return operationType;
-//	}
 	{
 		ArrayList<ArrayList<String>> operationType = new ArrayList<>();
-		//ArrayList<String> currentOp;
-		//Iterator<ArrayList<String>> iterator  = operationsBreaked.iterator();
-
 		for (int i=0 ; i<operationsBreaked.size() ; i++)
 		{
-			//currentOp = iterator.next();
 			if (operationsBreaked.get(i).get(0).matches(regex))
 			{
 				operationType.add(operationsBreaked.get(i)); 
@@ -340,7 +313,6 @@ public class NestingCreator {
 					if (match.group(PARAMETER_NAME).matches("DI"))
 					{
 						thickness = match.group(PARAMETER_VALUE);
-						//thickness = thickness.replaceAll("\\\\", "");
 						break;
 					}
 				}

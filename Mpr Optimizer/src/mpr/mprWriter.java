@@ -11,8 +11,8 @@ import xml.MprFile;
 
 public class mprWriter {
 	// empty constructor
-	public static final String PLATE_DIRECTORY = "c:\\\\Nesting_Mprs";
-	public static final String LEFT_OVER = "c:\\\\LeftOvers_Mprs";
+	public static final String PLATE_DIRECTORY = "c:\\Nesting_Mprs";
+	public static final String LEFT_OVER = "c:\\LeftOvers_Mprs";
 	public static Pattern mprLine = Pattern.compile("(\\w+)=\"([.\\-\\+\\(\\)\\w]+)\"");
 	public static Pattern contourLine = Pattern.compile("(\\w)=([.\\+\\-\\(\\)\\w]+)");
 
@@ -52,17 +52,17 @@ public class mprWriter {
 	public static void createPlateMpr(Point3D dimensions,
 			ArrayList<String> lines, String name) {
 		ArrayList<String> headerLines = new ArrayList<>();
-		headerLines.add("[H\n\r");
-		headerLines.add("VERSION=\"4.0\"\n\r");
-		headerLines.add("OP=\"2\"\n\r");
-		headerLines.add("<100 \\WerkStck\\\n\r");
-		headerLines.add("LA=\"" + dimensions.getX() + "\"\n\r");
-		headerLines.add("BR=\"" + dimensions.getY() + "\"\n\r");
-		headerLines.add("DI=\"" + dimensions.getZ() + "\"\n\r");
-		headerLines.add("FNX=\"0\"\n\r");
-		headerLines.add("FNY=\"0\"\n\r");
-		headerLines.add("AX=\"0\"n\r");
-		headerLines.add("AY=\"0\"\n\r");
+		headerLines.add("[H");
+		headerLines.add("VERSION=\"4.0\"");
+		headerLines.add("OP=\"2\"");
+		headerLines.add("<100 \\WerkStck\\");
+		headerLines.add("LA=\"" + dimensions.getX() + "\"");
+		headerLines.add("BR=\"" + dimensions.getY() + "\"");
+		headerLines.add("DI=\"" + dimensions.getZ() + "\"");
+		headerLines.add("FNX=\"0\"");
+		headerLines.add("FNY=\"0\"");
+		headerLines.add("AX=\"0\"");
+		headerLines.add("AY=\"0\"");
 		for (String line : lines) {
 			headerLines.add(line);
 		}
@@ -112,13 +112,13 @@ public class mprWriter {
 			if (contourMatcher.find()) {
 				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
 					line = xContour + "="+ contourMatcher.group(NestingCreator.PARAMETER_VALUE) 
-							+ "+" + xOffset + "\n\r";
+							+ "+" + xOffset ;
 					lines.set(index, line);
 				}
 
 				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(yContour)) {
 					line = yContour	+ "=" + contourMatcher.group(NestingCreator.PARAMETER_VALUE)
-							+ "+" + yOffset + "\n\r";
+							+ "+" + yOffset ;
 					lines.set(index, line);
 				}
 			}
@@ -138,7 +138,7 @@ public class mprWriter {
 							xParameters[i])) {
 						line = xParameters[i]+ "=\""
 								+ mprMatcher.group(NestingCreator.PARAMETER_VALUE) + "+"
-								+ xOffset + "\"\n\r";
+								+ xOffset + "\"";
 						lines.set(index, line);
 						break;
 					}
@@ -148,7 +148,7 @@ public class mprWriter {
 							yParameters[i])) {
 						line = yParameters[i] + "=\""
 								+ mprMatcher.group(NestingCreator.PARAMETER_VALUE)+ "+"
-								+ yOffset + "\"\n\r";
+								+ yOffset + "\"";
 						lines.set(index, line);
 						break;
 					}
