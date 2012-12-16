@@ -23,7 +23,7 @@ public class NestingCreator {
 	public static final String vertTrimmingHeader ="<105 \\\\Konturfraesen\\\\";
 	public static final String horizBoring = "<103 \\\\BohrHoriz\\\\";
 	public static final String contourRegex = "](\\d+)";
-	public static final String contourElementRegex = "$\\d+";
+	public static final String contourElementRegex = "\\$E\\d+";
 	public static final String millingOperationRegex = "(\\w+=\")(\\d+)(:\\d+\")";
 
 
@@ -120,18 +120,22 @@ public class NestingCreator {
 					updateIndexesContours(contoursBreaked, currentContourIndex);
 					updateIndexesMilling(vertMilling, currentContourIndex);
 					currentContourIndex += contoursBreaked.size();
-
+					
+					int index =0;
 					for (ArrayList<String> contour : contoursBreaked){
 						ArrayList<ArrayList<String>> currentContourBreaked = breakContours(contour, contourElementRegex);
-						if (xOffset>0 || yOffset>0)
-							for (ArrayList<String> contourElement : currentContourBreaked)
-								mprWriter.addOffsetToOperation(contourElement, Double.toString(xOffset), Double.toString(yOffset));
-
 						if (shouldFlip)
-							for (ArrayList<String> contourElement : currentContourBreaked)
-								mprWriter.flipXY(contourElement, Double.toString(currentMpr.getLength()));
+							for (int i=0 ; i<currentContourBreaked.size() ; i++)
+								mprWriter.flipXYContour(currentContourBreaked.get(i), Double.toString(currentMpr.getLength()));
+						
+						if (xOffset>0 || yOffset>0)
+							for (int i=0 ; i<currentContourBreaked.size() ; i++)
+								mprWriter.addOffsetToContour(currentContourBreaked.get(i), Double.toString(xOffset), Double.toString(yOffset));
+
 						contour = new ArrayList<String>();
 						uniteArrayLists(currentContourBreaked, contour);
+						contoursBreaked.set(index, contour);
+						index++;
 					}
 
 					uniteArrayLists(vertMilling, currentPlateMillings);
@@ -151,10 +155,12 @@ public class NestingCreator {
 
 				//add relevant plate lines
 				for (ArrayList<String> operation : operationsBreaked){
-					if (xOffset>0 || yOffset>0)
-						mprWriter.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
 					if (shouldFlip)
 						mprWriter.flipXY(operation, Double.toString(currentMpr.getLength()));
+					
+					if (xOffset>0 || yOffset>0)
+						mprWriter.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
+
 				}
 				uniteArrayLists(operationsBreaked, currentPlateOperations);
 			}
@@ -164,7 +170,7 @@ public class NestingCreator {
 			allPlateLines.addAll(currentPlateContours);
 			allPlateLines.addAll(currentPlateMillings);
 			allPlateLines.addAll(currentPlateOperations);
-			mprWriter.createPlateMpr(plateMeasurements, allPlateLines, "Plate"+ currentLayout.getNumber());
+			mprWriter.createPlateMpr(plateMeasurements, allPlateLines, "Plate"+ currentLayout.getNumber()+".mpr");
 
 		}
 	}

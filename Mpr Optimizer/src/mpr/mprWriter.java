@@ -11,11 +11,16 @@ import xml.MprFile;
 
 public class mprWriter {
 	// empty constructor
-	public static final String PLATE_DIRECTORY = "Nesting_Mprs";
-	public static final String LEFT_OVER = "LeftOvers_Mprs";
-	public static Pattern mprLine = Pattern.compile("(\\w)=(\"\\w\")");
-	public static final String[] xParameters = { "XA", "XE", "X" };
-	public static final String[] yParameters = { "YA", "YE", "Y" };
+	public static final String PLATE_DIRECTORY = "c:\\\\Nesting_Mprs";
+	public static final String LEFT_OVER = "c:\\\\LeftOvers_Mprs";
+	public static Pattern mprLine = Pattern.compile("(\\w+)=\"([.\\-\\+\\(\\)\\w]+)\"");
+	public static Pattern contourLine = Pattern.compile("(\\w)=([.\\+\\-\\(\\)\\w]+)");
+
+	public static final String xContour = "X";
+	public static final String yContour = "Y";
+
+	public static final String[] xParameters = { "XA", "XE"};
+	public static final String[] yParameters = { "YA", "YE"};
 
 	// search recursively the given file name in the directory, if found return
 	// a File object of it,
@@ -99,36 +104,60 @@ public class mprWriter {
 		}
 	}
 
+	public static void addOffsetToContour(ArrayList<String> lines,
+			String xOffset, String yOffset) {
+		int index=0;
+		for (String line : lines) {
+			Matcher contourMatcher = contourLine.matcher(line);
+			if (contourMatcher.find()) {
+				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
+					line = xContour + "="+ contourMatcher.group(NestingCreator.PARAMETER_VALUE) 
+							+ "+" + xOffset + "\n\r";
+					lines.set(index, line);
+				}
+
+				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(yContour)) {
+					line = yContour	+ "=" + contourMatcher.group(NestingCreator.PARAMETER_VALUE)
+							+ "+" + yOffset + "\n\r";
+					lines.set(index, line);
+				}
+			}
+			index++;
+		}
+		return;
+	}
+
 	public static void addOffsetToOperation(ArrayList<String> lines,
 			String xOffset, String yOffset) {
+		int index=0;
 		for (String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
 			if (mprMatcher.find()) {
 				for (int i = 0; i < xParameters.length; i++) {
 					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals(
 							xParameters[i])) {
-						line = xParameters[i]
-								+ "\""
-								+ mprMatcher
-										.group(NestingCreator.PARAMETER_VALUE)
+						line = xParameters[i]+ "=\""
+								+ mprMatcher.group(NestingCreator.PARAMETER_VALUE) + "+"
 								+ xOffset + "\"\n\r";
+						lines.set(index, line);
 						break;
 					}
 				}
 				for (int i = 0; i < yParameters.length; i++) {
 					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals(
 							yParameters[i])) {
-						line = yParameters[i]
-								+ "\""
-								+ mprMatcher
-										.group(NestingCreator.PARAMETER_VALUE)
+						line = yParameters[i] + "=\""
+								+ mprMatcher.group(NestingCreator.PARAMETER_VALUE)+ "+"
 								+ yOffset + "\"\n\r";
+						lines.set(index, line);
 						break;
 					}
 				}
 			}
+			index++;
 		}
 	}
+
 
 	public static void flipXY(ArrayList<String> lines, String yLen) {
 		String oldXA = "", oldYA = "", oldXE = "", oldYE = "";
@@ -150,6 +179,7 @@ public class mprWriter {
 				}
 			}
 		}
+		int index=0;
 		for(String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
 			if (mprMatcher.find()) {
@@ -159,6 +189,7 @@ public class mprWriter {
 				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
 						.equals("XE")) {
 					line = "XE=\"" + yLen + "-(" + oldYE + ")\"";
+
 				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
 						.equals("YA")) {
 					line = "YA=\"" + oldXA + "\"";
@@ -166,19 +197,48 @@ public class mprWriter {
 						.equals("YE")) {
 					line = "YE=\"" + oldXE + "\"";
 				}
+				lines.set(index, line);
+			}
+			index++;
+		}
+	}
+	
+	public static void flipXYContour(ArrayList<String> lines, String yLen) {
+		String oldX="", oldY="";
+		for (String line : lines) {
+			Matcher contourMatcher = contourLine.matcher(line);
+			if (contourMatcher.find()) {
+				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
+					oldX = contourMatcher.group(NestingCreator.PARAMETER_VALUE);
+				} else if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(yContour)) {
+					oldY = contourMatcher.group(NestingCreator.PARAMETER_VALUE);
+				}
 			}
 		}
+		int index=0;
+		for(String line : lines) {
+			Matcher contourMatcher = contourLine.matcher(line);
+			if (contourMatcher.find()) {
+				 if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
+					line = "X=" + yLen + "-(" + oldY + ")";
+				} else if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(yContour)) {
+					line = "Y=" + "("+oldX+ ")";
+				}
+				lines.set(index, line);
+			}
+			index++;
+		}
+		return;
 	}
 	
 	public static boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)
 	{
 		for(String line: header) {
-			if(line.toUpperCase().equals("LA")) {
 				Matcher mprMatcher = mprLine.matcher(line);
-				if(mprMatcher.find()) {
+				if(mprMatcher.find() && mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("LA")){
 					String valueString = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
 					double valueDouble = Double.parseDouble(valueString);
-					if(Math.abs(valueDouble) - currentMpr.getLength() < 0.01) {
+					if(Math.abs(valueDouble - currentMpr.getLength()) < 0.01) {
 						return false;
 					}
 					else {
@@ -186,7 +246,7 @@ public class mprWriter {
 					}
 				}
 			}
-		}
+		
 		//search and determine
 		return false;
 	}
