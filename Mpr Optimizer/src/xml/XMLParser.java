@@ -43,8 +43,10 @@ public class XMLParser {
 		this.xmlFileName = xmlFileName;
 		layoutsList = new ArrayList<>();
 	}
-
-	public void parse() {
+	
+	//returns number of mpr files in the xml
+	public int parse() {
+		int mprCount = 0;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		File newFile = null;
 		try {
@@ -90,6 +92,7 @@ public class XMLParser {
 
 
 					MprFile mprFile = new MprFile(partCode, description, xOffset, yOffset, partLength, partWidth);
+					mprCount++;
 					layout.addMprFile(mprFile);
 				}
 				layoutsList.add(layout);
@@ -98,6 +101,7 @@ public class XMLParser {
 		if(newFile != null) {
 			newFile.delete();
 		}
+		return mprCount;
 	}
 
 	private String getTextValue(Element element, String tagName) {

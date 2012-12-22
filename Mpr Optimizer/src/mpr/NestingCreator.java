@@ -6,10 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import javax.swing.JProgressBar;
 import xml.Layout;
 import xml.MprFile;
 import xml.XMLParser;
@@ -31,18 +30,24 @@ public class NestingCreator {
 
 	//private Layout currentLayout;`
 	//MprFile firstFile;
-	ArrayList<Layout> layouts;
+	private ArrayList<Layout> layouts;
 	private XMLParser parser;
-	String mprDirectory;
-
-	public NestingCreator(String xmlFile, String mprDirectory){
-		parser = new XMLParser(xmlFile);
-		parser.parse();
-		layouts = parser.getLayouts();
+	private String mprDirectory;
+	private ArrayList<String> errorMsg;
+	private JProgressBar progressBar;
+	private int mprCount;
+	
+	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar){
+		this.parser = new XMLParser(xmlFile);
+		this.mprCount = this.parser.parse();
+		this.layouts = parser.getLayouts();
+		this.errorMsg = errorMsg;
+		this.progressBar = bar;
 		this.mprDirectory = mprDirectory;
 	}
 
 	public void createLayoutMprs () throws IOException{
+		int currentMprCount = 0;
 		for (Layout currentLayout : layouts){
 			int currentContourIndex = 0;
 			ArrayList<MprFile> mprs = currentLayout.getMprFiles();
@@ -53,6 +58,14 @@ public class NestingCreator {
 			Point3D plateMeasurements = null;
 			try {
 				plateMeasurements = determinePlateMeasurements(currentLayout, mprs.get(0));
+				if (plateMeasurements==null)
+				{
+					errorMsg.add("File " + currentLayout.getMprFiles().get(0).getPartCode() + " was not found in the current directory");
+					errorMsg.add("Plate " + currentLayout.getNumber() + " Couldn't be created");
+					//look for other mpr to take measurements!!!!!!
+					continue;
+
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -60,6 +73,12 @@ public class NestingCreator {
 			for (MprFile currentMpr:mprs)
 			{
 				File mprFile = mprWriter.findFile(currentMpr.getPartCode(), mprDirectory);
+				if (mprFile==null){
+					errorMsg.add("File " + currentMpr.getPartCode() + " from plate #"
+							+currentLayout.getNumber()+" was not found in the current directory");
+					continue;
+				}
+				
 				double xOffset = currentMpr.getXOffset();
 				double yOffset = currentMpr.getYOffset();
 				BufferedReader reader = null;;
@@ -86,7 +105,7 @@ public class NestingCreator {
 						break;
 				}
 				//check if should flip xy coordinates
-				boolean shouldFlip = mprWriter.shouldFlip(currentMpr, header);
+				boolean shouldFlip = mprParser.shouldFlip(currentMpr, header);
 				//contour lines
 				if (currentLine.matches(contourRegex)){
 					while (reader.ready() && !isOperation(currentLine))
@@ -111,7 +130,7 @@ public class NestingCreator {
 					ArrayList<ArrayList<String>> contoursBreaked = breakContours(contours, contourRegex);
 					ArrayList<ArrayList<String>> vertMilling = extractSpecificOpType(operationsBreaked, vertTrimmingHeader);
 					if (contoursBreaked.size() != vertMilling.size())
-						System.out.println("ERROR!!! Contouring and milling not the same size at file :" + currentMpr.getPartCode());
+						errorMsg.add("ERROR!!! Contouring and milling not the same size at file :" + currentMpr.getPartCode());
 
 					updateIndexesContours(contoursBreaked, currentContourIndex);
 					updateIndexesMilling(vertMilling, currentContourIndex);
@@ -122,11 +141,11 @@ public class NestingCreator {
 						ArrayList<ArrayList<String>> currentContourBreaked = breakContours(contour, contourElementRegex);
 						if (shouldFlip)
 							for (int i=0 ; i<currentContourBreaked.size() ; i++)
-								mprWriter.flipXYContour(currentContourBreaked.get(i), Double.toString(currentMpr.getLength()));
+								mprParser.flipXYContour(currentContourBreaked.get(i), Double.toString(currentMpr.getLength()));
 						
 						if (xOffset>0 || yOffset>0)
 							for (int i=0 ; i<currentContourBreaked.size() ; i++)
-								mprWriter.addOffsetToContour(currentContourBreaked.get(i), Double.toString(xOffset), Double.toString(yOffset));
+								mprParser.addOffsetToContour(currentContourBreaked.get(i), Double.toString(xOffset), Double.toString(yOffset));
 
 						contour = new ArrayList<String>();
 						uniteArrayLists(currentContourBreaked, contour);
@@ -145,20 +164,23 @@ public class NestingCreator {
 					uniteArrayLists(unSupportedOps, header);
 					header.add(fileEnd);
 					String fileName = currentMpr.getPartCode();
-					mprWriter.createLeftOverMpr(header, fileName); 
+					mprWriter.createLeftOverMpr(header, mprDirectory, fileName); 
 				}
 
-
+				
 				//add relevant plate lines
 				for (ArrayList<String> operation : operationsBreaked){
 					if (shouldFlip)
-						mprWriter.flipXY(operation, Double.toString(currentMpr.getLength()));
+						mprParser.flipXY(operation, Double.toString(currentMpr.getLength()));
 					
 					if (xOffset>0 || yOffset>0)
-						mprWriter.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
+						mprParser.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
 
 				}
 				uniteArrayLists(operationsBreaked, currentPlateOperations);
+				
+				currentMprCount++;
+				progressBar.setValue(currentMprCount/mprCount*100);
 			}
 
 			//createPlateFile:
@@ -166,7 +188,7 @@ public class NestingCreator {
 			allPlateLines.addAll(currentPlateContours);
 			allPlateLines.addAll(currentPlateMillings);
 			allPlateLines.addAll(currentPlateOperations);
-			mprWriter.createPlateMpr(plateMeasurements, allPlateLines, "Plate"+ currentLayout.getNumber()+".mpr");
+			mprWriter.createPlateMpr(plateMeasurements, allPlateLines, mprDirectory, "Plate"+ currentLayout.getNumber()+".mpr");
 
 		}
 	}
@@ -228,7 +250,6 @@ public class NestingCreator {
 					operationsBreaked.add(currentOp);
 				currentOp = new ArrayList<String>();
 				currentOp.add(line);
-
 			}
 
 		}
@@ -252,8 +273,6 @@ public class NestingCreator {
 					contoursBreaked.add(currentContour);
 				currentContour = new ArrayList<String>();
 				currentContour.add(line);
-
-
 			}
 		}
 		if (!currentContour.isEmpty())
@@ -292,6 +311,8 @@ public class NestingCreator {
 		else
 			return operationType;
 	}
+	
+	
 	private Point3D determinePlateMeasurements(Layout currentLayout, MprFile firstFile) throws IOException
 	{
 		double length = currentLayout.getLength();

@@ -17,6 +17,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -38,11 +39,12 @@ import mpr.NestingCreator;
 import serial.License;
 import serial.LocalVerifier;
 import serial.RemoteVerifier;
+import javax.swing.JProgressBar;
 
 
 public class NestingGUI {
 
-	
+
 	private static final String LICENSE_FILE = "\\License\\license.data";
 
 	private JFrame frame;
@@ -63,6 +65,7 @@ public class NestingGUI {
 	private File homeFolder;
 	private boolean isXMLFileSelected;
 	private boolean isMPRDestDirSelected;
+	private JProgressBar progressBar;
 
 	/**
 	 * Launch the application.
@@ -89,7 +92,7 @@ public class NestingGUI {
 		initialize();
 	}
 
-	
+
 	private void localVerifyLicense() {
 		LocalVerifier localVerifier = new LocalVerifier(homeFolder);
 		File license = new File(homeFolder.getAbsolutePath() + LICENSE_FILE);
@@ -175,11 +178,11 @@ public class NestingGUI {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void printErrorMessage(String message) {
 		JOptionPane.showMessageDialog(frame, message);
 	}
-	
+
 	/**
 	 * Set default values.
 	 */
@@ -188,6 +191,7 @@ public class NestingGUI {
 		mprPath.setText("");
 		btnGenerateNesting.setEnabled(false);
 		txtrStatusBar.setText("Status:");
+		progressBar.setValue(0);
 		frame.repaint();
 	}
 	/**
@@ -221,27 +225,15 @@ public class NestingGUI {
 		frame = new JFrame("Nesting MPR Generator");
 		frame.setBounds(100, 100, 600, 500);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		//look and feel:
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (InstantiationException e1) {
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			e1.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e1) {
-			e1.printStackTrace();
-		}
-		
+
+
 		//Menu Bar:
 		menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
-		
+
 		mnFile = new JMenu("File");
 		menuBar.add(mnFile);
-		
+
 		mntmNew = new JMenuItem("New");
 		mntmNew.addActionListener(new ActionListener() {
 			@Override
@@ -250,10 +242,10 @@ public class NestingGUI {
 			}
 		});
 		mnFile.add(mntmNew);
-		
+
 		mntmGenerateNesting = new JMenuItem("Generate Nesting");
 		mnFile.add(mntmGenerateNesting);
-		
+
 		mntmExit = new JMenuItem("Exit");
 		mntmExit.addActionListener(new ActionListener() {
 			@Override
@@ -262,50 +254,70 @@ public class NestingGUI {
 			}
 		});
 		mnFile.add(mntmExit);
-		
+
 		mnAbout = new JMenu("About");
 		menuBar.add(mnAbout);
 		frame.getContentPane().setLayout(null);
-		
+
 		//Gui
 		lblXmlFile = new JLabel("XML File");
 		lblXmlFile.setFont(new Font("Lucida Grande", Font.BOLD, 18));
 		lblXmlFile.setBounds(20, 37, 87, 29);
 		frame.getContentPane().add(lblXmlFile);
-		
+
 		lblWoodwopFilesDirectory = new JLabel("WoodWop Files:");
 		lblWoodwopFilesDirectory.setFont(new Font("Lucida Grande", Font.BOLD, 18));
 		lblWoodwopFilesDirectory.setBounds(20, 89, 156, 29);
 		frame.getContentPane().add(lblWoodwopFilesDirectory);
-		
+
 		btnGenerateNesting = new JButton("Generate Nesting!");
 		btnGenerateNesting.setEnabled(false);
 		btnGenerateNesting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				NestingCreator nestingCreator = new NestingCreator(xmlFilePath.getText(), mprPath.getText());
+				ArrayList<String> errorMessages = new ArrayList<>();
+				NestingCreator nestingCreator = new NestingCreator
+						(xmlFilePath.getText(), mprPath.getText(), errorMessages,progressBar);
 				try {
-					nestingCreator.createLayoutMprs();
 					txtrStatusBar.setText("Status: Processing..");
+					nestingCreator.createLayoutMprs();
 				} catch (IOException e1) {
 					e1.printStackTrace();
+					JOptionPane.showMessageDialog(frame,
+							"Unknown error occured, please contact support");
+					//write error log!!!!!!!!!
 				}
+				if (errorMessages.size() == 0)
+				{
+					txtrStatusBar.setText("All Files Created Succesfully.");
+					JOptionPane.showMessageDialog(frame, "All Files Created Succesfully.");
+				}else{
+					String resultString = "";
+					for (String currentLine : errorMessages)
+					{
+						resultString = resultString.concat(currentLine + "\n");
+					}
+					txtrStatusBar.setText(resultString);
+					JOptionPane.showMessageDialog(frame,
+							"Operation With Errors, Please Check Status Log");
+				}
+
 			}
 		});
 		btnGenerateNesting.setBounds(246, 141, 139, 29);
 		frame.getContentPane().add(btnGenerateNesting);
-		
+
 		xmlFilePath = new JTextField();
 		xmlFilePath.setEditable(false);
 		xmlFilePath.setBounds(183, 39, 226, 28);
 		frame.getContentPane().add(xmlFilePath);
 		xmlFilePath.setColumns(10);
-		
+
 		mprPath = new JTextField();
 		mprPath.setEditable(false);
 		mprPath.setColumns(10);
 		mprPath.setBounds(183, 91, 226, 28);
 		frame.getContentPane().add(mprPath);
-		
+
 		btnXmlBrowse = new JButton("Browse");
 		btnXmlBrowse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -313,7 +325,7 @@ public class NestingGUI {
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				FileNameExtensionFilter xmlExtensionFilter = new FileNameExtensionFilter("XML File (*.xml)", "xml");
 				fileChooser.setFileFilter(xmlExtensionFilter);
-				fileChooser.setDialogTitle("Choose your file:");
+				fileChooser.setDialogTitle("Choose your XML file:");
 				fileChooser.setBounds(6, 6, 550, 400);
 				int result = fileChooser.showOpenDialog(frame);
 				if(result == JFileChooser.APPROVE_OPTION) {
@@ -323,12 +335,13 @@ public class NestingGUI {
 					if(isMPRDestDirSelected) {
 						btnGenerateNesting.setEnabled(true);
 					}
+					homeFolder = new File(selectedXML.getAbsolutePath());
 				}
 			}
 		});
 		btnXmlBrowse.setBounds(461, 40, 117, 29);
 		frame.getContentPane().add(btnXmlBrowse);
-		
+
 		btnMprBrowse = new JButton("Browse");
 		btnMprBrowse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -344,22 +357,27 @@ public class NestingGUI {
 					if(isXMLFileSelected) {
 						btnGenerateNesting.setEnabled(true);
 					}
+					homeFolder = selectedDir;
 				}
 			}
 		});
 		btnMprBrowse.setBounds(461, 92, 117, 29);
 		frame.getContentPane().add(btnMprBrowse);
-		
+
 		txtrStatusBar = new JTextArea();
 		txtrStatusBar.setEditable(false);
 		txtrStatusBar.setText("Status");
 		txtrStatusBar.setBounds(20, 228, 558, 201);
 		frame.getContentPane().add(txtrStatusBar);
-		
-		xmlFilePath.setText("c:\\\\test\\\\xml.xml");
-		mprPath.setText("c:\\\\test\\\\mpr\\\\");
-		btnGenerateNesting.setEnabled(true);
+
+		//xmlFilePath.setText("c:\\\\test\\\\xml.xml");
+		//mprPath.setText("c:\\\\test\\\\mpr\\\\");
+		//btnGenerateNesting.setEnabled(true);
+
+		progressBar = new JProgressBar(0,100);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
+		progressBar.setBounds(20, 196, 558, 20);
+		frame.getContentPane().add(progressBar);
 	}
-
-
 }
