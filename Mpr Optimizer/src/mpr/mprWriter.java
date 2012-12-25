@@ -1,9 +1,16 @@
 package mpr;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+
+import xml.Layout;
+import xml.MprFile;
 
 public class mprWriter {
 	// empty constructor
@@ -93,5 +100,20 @@ public class mprWriter {
 		}
 	}
 	
+	
+	public static ArrayList<String> readFileCompletly(MprFile fileToRead, String mprDirectory) throws IOException
+	{
+		File fileLocation = mprWriter.findFile(fileToRead.getPartCode(), mprDirectory);
+		if (fileLocation!= null){
+			BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
+			ArrayList<String> lines = new ArrayList<>();
+			while (reader.ready()){
+				lines.add(reader.readLine());
+			}
+			reader.close();
+			return lines;
+		}
+		return null;
+	}
 	
 }

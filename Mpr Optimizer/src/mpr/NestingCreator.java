@@ -166,6 +166,13 @@ public class NestingCreator {
 					String fileName = currentMpr.getPartCode();
 					mprWriter.createLeftOverMpr(header, mprDirectory, fileName); 
 				}
+				
+				//create second side if needed
+				if (currentMpr.getSecondPartCode().length()>1)
+				{
+					ArrayList<String> lines = mprWriter.readFileCompletly(currentMpr, mprDirectory);
+					mprWriter.createLeftOverMpr(lines, mprDirectory, "Back_Ops_"+currentMpr.getPartCode());
+				}
 
 				
 				//add relevant plate lines

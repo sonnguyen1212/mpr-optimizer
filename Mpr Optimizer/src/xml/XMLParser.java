@@ -32,6 +32,7 @@ public class XMLParser {
 	private static final String XML_DESCRIPTION = "Description";
 	private static final String XML_PART_LENGTH = "Length";
 	private static final String XML_PART_WIDTH = "Width";
+	private static final String XML_PART_SECOND_PROG = "Notes";
 	private static final String XML_REPLACEMENT_HEADER = "<?xml version=\"1.0\" encoding=\"Cp1252\"?>";
 
 
@@ -85,13 +86,14 @@ public class XMLParser {
 					String yOffsetString = getTextValue(layoutElement, XML_TOP_OFFSET).replaceAll("\\D", "");
 					String partLengthString = getTextValue(layoutElement, XML_PART_LENGTH).replaceAll("\\D", "");
 					String partWidthString = getTextValue(layoutElement, XML_PART_WIDTH).replaceAll("\\D", "");
+					String secondPartCode = getTextValue(layoutElement, XML_PART_SECOND_PROG).trim() + ".mpr";;
 					double xOffset = Double.parseDouble(xOffsetString);
 					double yOffset = Double.parseDouble(yOffsetString);
 					double partLength = Double.parseDouble(partLengthString);
 					double partWidth = Double.parseDouble(partWidthString);
 
 
-					MprFile mprFile = new MprFile(partCode, description, xOffset, yOffset, partLength, partWidth);
+					MprFile mprFile = new MprFile(partCode, secondPartCode, description, xOffset, yOffset, partLength, partWidth);
 					mprCount++;
 					layout.addMprFile(mprFile);
 				}
