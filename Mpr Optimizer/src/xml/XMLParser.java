@@ -35,7 +35,6 @@ public class XMLParser {
 	private static final String XML_PART_SECOND_PROG = "Notes";
 	private static final String XML_REPLACEMENT_HEADER = "<?xml version=\"1.0\" encoding=\"Cp1252\"?>";
 
-
 	private String xmlFileName;
 	private Document document;
 	private ArrayList<Layout> layoutsList;
@@ -44,8 +43,8 @@ public class XMLParser {
 		this.xmlFileName = xmlFileName;
 		layoutsList = new ArrayList<>();
 	}
-	
-	//returns number of mpr files in the xml
+
+	// returns number of mpr files in the xml
 	public int parse() {
 		int mprCount = 0;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -69,38 +68,51 @@ public class XMLParser {
 			for (int i = 0; i < rootNodesList.getLength(); i++) {
 				System.out.println("Layout " + i);
 				Element element = (Element) rootNodesList.item(i);
-				int layoutNumber = Integer.parseInt(getTextValue(element, XML_LAYOUT_NUMBER));
-				String layoutLengthString = getTextValue(element, XML_LAYOUT_LENGTH).replaceAll("\\D", "");
-				String layoutWidthString = getTextValue(element, XML_LAYOUT_WIDTH).replaceAll("\\D", "");
+				int layoutNumber = Integer.parseInt(getTextValue(element,
+						XML_LAYOUT_NUMBER));
+				String layoutLengthString = getTextValue(element,
+						XML_LAYOUT_LENGTH).replaceAll("\\D", "");
+				String layoutWidthString = getTextValue(element,
+						XML_LAYOUT_WIDTH).replaceAll("\\D", "");
 				double layoutLength = Double.parseDouble(layoutLengthString);
 				double layoutWidth = Double.parseDouble(layoutWidthString);
 
-				Layout layout = new Layout(layoutNumber, layoutLength, layoutWidth);
-				NodeList layoutsNodeList = element.getElementsByTagName(XML_PART);
+				Layout layout = new Layout(layoutNumber, layoutLength,
+						layoutWidth);
+				NodeList layoutsNodeList = element
+						.getElementsByTagName(XML_PART);
 				for (int j = 0; j < layoutsNodeList.getLength(); j++) {
 					System.out.println("-Part " + j);
 					Element layoutElement = (Element) layoutsNodeList.item(j);
-					String partCode = getTextValue(layoutElement, XML_PARTCODE).trim() + ".mpr";
-					String description = getTextValue(layoutElement, XML_DESCRIPTION);
-					String xOffsetString = getTextValue(layoutElement, XML_LEFT_OFFSET).replaceAll("\\D", "");
-					String yOffsetString = getTextValue(layoutElement, XML_TOP_OFFSET).replaceAll("\\D", "");
-					String partLengthString = getTextValue(layoutElement, XML_PART_LENGTH).replaceAll("\\D", "");
-					String partWidthString = getTextValue(layoutElement, XML_PART_WIDTH).replaceAll("\\D", "");
-					String secondPartCode = getTextValue(layoutElement, XML_PART_SECOND_PROG).trim() + ".mpr";;
+					String partCode = getTextValue(layoutElement, XML_PARTCODE)
+							.trim() + ".mpr";
+					String description = getTextValue(layoutElement,
+							XML_DESCRIPTION);
+					String xOffsetString = getTextValue(layoutElement,
+							XML_LEFT_OFFSET).replaceAll("\\D", "");
+					String yOffsetString = getTextValue(layoutElement,
+							XML_TOP_OFFSET).replaceAll("\\D", "");
+					String partLengthString = getTextValue(layoutElement,
+							XML_PART_LENGTH).replaceAll("\\D", "");
+					String partWidthString = getTextValue(layoutElement,
+							XML_PART_WIDTH).replaceAll("\\D", "");
+					String secondPartCode = getTextValue(layoutElement,
+							XML_PART_SECOND_PROG);
 					double xOffset = Double.parseDouble(xOffsetString);
 					double yOffset = Double.parseDouble(yOffsetString);
 					double partLength = Double.parseDouble(partLengthString);
 					double partWidth = Double.parseDouble(partWidthString);
 
-
-					MprFile mprFile = new MprFile(partCode, secondPartCode, description, xOffset, yOffset, partLength, partWidth);
+					MprFile mprFile = new MprFile(partCode, secondPartCode,
+							description, xOffset, yOffset, partLength,
+							partWidth);
 					mprCount++;
 					layout.addMprFile(mprFile);
 				}
 				layoutsList.add(layout);
 			}
 		}
-		if(newFile != null) {
+		if (newFile != null) {
 			newFile.delete();
 		}
 		return mprCount;
@@ -111,7 +123,9 @@ public class XMLParser {
 		NodeList nl = element.getElementsByTagName(tagName);
 		if (nl != null && nl.getLength() > 0) {
 			Element el = (Element) nl.item(0);
-			textVal = el.getFirstChild().getNodeValue();
+			if (el.getFirstChild() != null) {
+				textVal = el.getFirstChild().getNodeValue();
+			}
 		}
 
 		return textVal;
@@ -120,12 +134,14 @@ public class XMLParser {
 	private File replaceHeader(String xmlFile) {
 		File newFile = new File(xmlFile + "temp.xml");
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(xmlFile)));
+			BufferedReader reader = new BufferedReader(new FileReader(new File(
+					xmlFile)));
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newFile));
-			writer.write(XML_REPLACEMENT_HEADER + "\n\r", 0, (XML_REPLACEMENT_HEADER + "\n\r").length());
+			writer.write(XML_REPLACEMENT_HEADER + "\n\r", 0,
+					(XML_REPLACEMENT_HEADER + "\n\r").length());
 			reader.readLine();
 			String line = "";
-			while((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				writer.write(line, 0, line.length());
 			}
 			writer.close();
@@ -139,7 +155,7 @@ public class XMLParser {
 		}
 		return newFile;
 	}
-	
+
 	public ArrayList<Layout> getLayouts() {
 		return layoutsList;
 	}

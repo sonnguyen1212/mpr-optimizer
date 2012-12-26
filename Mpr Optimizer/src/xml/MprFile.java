@@ -15,7 +15,11 @@ public class MprFile {
 		this.yOffset = yOffset;
 		this.length = length;
 		this.width = width;
-		this.secondPartCode = secondPartCode;
+		if(secondPartCode != null) {
+			this.secondPartCode = secondPartCode.trim() + ".mpr"; 
+		} else {
+			this.secondPartCode = null;
+		}
 	}
 
 	public String getPartCode() {
