@@ -77,7 +77,7 @@ public class NestingGUI {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
 					// window.remoteVerifyLicense();
-					//window.localVerifyLicense();
+					window.localVerifyLicense();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

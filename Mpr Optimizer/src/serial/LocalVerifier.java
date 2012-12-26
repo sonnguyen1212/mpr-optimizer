@@ -136,9 +136,7 @@ public class LocalVerifier {
 				ArrayList<String> macs = getAllAdresses();
 				for (String mac : macs) {
 					// TO REMOVE
-//					String md5key = md5(mac);
-					
-					String md5key = md5("1234456");
+					String md5key = md5(mac);
 					if (md5key.equals(license.getSerial())) {
 						return true;
 					}
