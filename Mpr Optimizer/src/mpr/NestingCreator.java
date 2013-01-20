@@ -351,7 +351,7 @@ public class NestingCreator {
 		return point;
 	}
 	
-	private Point3D readMprAndFileDims(File mprFile) throws IOException
+	public Point3D readMprAndFileDims(File mprFile) throws IOException
 	{
 		String length="", width="", thickness="";
 		Point3D point = null;
