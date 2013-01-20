@@ -168,7 +168,7 @@ public class NestingCreator {
 				}
 				
 				//create second side if needed
-				if (currentMpr.getSecondPartCode().length()>1)
+				if (currentMpr.getSecondPartCode()!=null)
 				{
 					ArrayList<String> lines = mprWriter.readFileCompletly(currentMpr, mprDirectory);
 					mprWriter.createLeftOverMpr(lines, mprDirectory, "Back_Ops_"+currentMpr.getPartCode());
@@ -349,6 +349,39 @@ public class NestingCreator {
 			point.setZ(thickness);
 		}
 		return point;
+	}
+	
+	private Point3D readMprAndFileDims(File mprFile) throws IOException
+	{
+		String length="", width="", thickness="";
+		Point3D point = null;
+		if (mprFile.exists()){
+			BufferedReader reader = new BufferedReader(new FileReader(mprFile));
+			String currentLine;
+			Matcher match;
+			while (reader.ready()){
+				currentLine = reader.readLine();
+				match = mprLine.matcher(currentLine);
+				if (match.find())
+				{
+					if (match.group(PARAMETER_NAME).matches("LA"))
+						length = match.group(PARAMETER_VALUE);
+					
+					else if (match.group(PARAMETER_NAME).matches("BR"))
+						width = match.group(PARAMETER_VALUE);
+					
+					else if (match.group(PARAMETER_NAME).matches("DI"))
+					{
+						thickness = match.group(PARAMETER_VALUE);
+						break;
+					}
+				}
+			}
+			reader.close();
+			point = new Point3D(length, width, thickness);
 
+			
+		}
+		return point;
 	}
 }
