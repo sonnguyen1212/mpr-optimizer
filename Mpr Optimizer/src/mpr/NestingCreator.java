@@ -14,7 +14,7 @@ import xml.MprFile;
 import xml.XMLParser;
 
 public class NestingCreator {
-	public Pattern mprLine = Pattern.compile("(\\w+)=\"(\\w+)\"");
+	public static Pattern mprLine = Pattern.compile("(\\w+)=\"(\\w+)\"");
 	public static final int PARAMETER_NAME = 1;
 	public static final int PARAMETER_VALUE = 2;
 	public static final String partDimens = "<100 \\\\WerkStck\\\\";
@@ -351,7 +351,7 @@ public class NestingCreator {
 		return point;
 	}
 	
-	public Point3D readMprAndFileDims(File mprFile) throws IOException
+	public static Point3D readMprAndFileDims(File mprFile) throws IOException
 	{
 		String length="", width="", thickness="";
 		Point3D point = null;
