@@ -71,9 +71,9 @@ public class XMLParser {
 				int layoutNumber = Integer.parseInt(getTextValue(element,
 						XML_LAYOUT_NUMBER));
 				String layoutLengthString = getTextValue(element,
-						XML_LAYOUT_LENGTH).replaceAll("\\D", "");
+						XML_LAYOUT_LENGTH).replaceAll("[^\\d\\.]", "");
 				String layoutWidthString = getTextValue(element,
-						XML_LAYOUT_WIDTH).replaceAll("\\D", "");
+						XML_LAYOUT_WIDTH).replaceAll("[^\\d\\.]", "");
 				double layoutLength = Double.parseDouble(layoutLengthString);
 				double layoutWidth = Double.parseDouble(layoutWidthString);
 
@@ -84,25 +84,30 @@ public class XMLParser {
 				for (int j = 0; j < layoutsNodeList.getLength(); j++) {
 					System.out.println("-Part " + j);
 					Element layoutElement = (Element) layoutsNodeList.item(j);
-					String partCode = getTextValue(layoutElement, XML_PARTCODE)
-							.trim() + ".mpr";
+					String partCode = getTextValue(layoutElement, XML_PARTCODE);
+					
+					//verify that this part has a cnc program
+					if (partCode==null)
+						continue;
+					else
+						partCode = partCode.trim() + ".mpr";
+					
 					String description = getTextValue(layoutElement,
 							XML_DESCRIPTION);
 					String xOffsetString = getTextValue(layoutElement,
-							XML_LEFT_OFFSET).replaceAll("\\D", "");
+							XML_LEFT_OFFSET).replaceAll("[^\\d\\.]", "");
 					String yOffsetString = getTextValue(layoutElement,
-							XML_TOP_OFFSET).replaceAll("\\D", "");
+							XML_TOP_OFFSET).replaceAll("[^\\d\\.]", "");
 					String partLengthString = getTextValue(layoutElement,
-							XML_PART_LENGTH).replaceAll("\\D", "");
+							XML_PART_LENGTH).replaceAll("[^\\d\\.]", "");
 					String partWidthString = getTextValue(layoutElement,
-							XML_PART_WIDTH).replaceAll("\\D", "");
+							XML_PART_WIDTH).replaceAll("[^\\d\\.]", "");
 					String secondPartCode = getTextValue(layoutElement,
 							XML_PART_SECOND_PROG);
 					double xOffset = Double.parseDouble(xOffsetString);
 					double yOffset = Double.parseDouble(yOffsetString);
 					double partLength = Double.parseDouble(partLengthString);
 					double partWidth = Double.parseDouble(partWidthString);
-
 					MprFile mprFile = new MprFile(partCode, secondPartCode,
 							description, xOffset, yOffset, partLength,
 							partWidth);
