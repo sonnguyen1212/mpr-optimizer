@@ -49,6 +49,9 @@ public class NestingCreator {
 	public void createLayoutMprs () throws IOException{
 		int currentMprCount = 0;
 		for (Layout currentLayout : layouts){
+			if (currentLayout==null)
+				continue;
+			
 			int currentContourIndex = 0;
 			ArrayList<MprFile> mprs = currentLayout.getMprFiles();
 			ArrayList<String> currentPlateContours = new ArrayList<String>();
@@ -160,6 +163,13 @@ public class NestingCreator {
 
 				//createLeftOverMPR
 				ArrayList<ArrayList<String>> unSupportedOps = extractSpecificOpType(operationsBreaked, horizBoring);
+				ArrayList<ArrayList<String>> sawingOps = extractSpecificOpType(operationsBreaked, supportedOps[1]);
+				//check if needed to add the sawing (if it exists)
+				if (unSupportedOps==null)
+					unSupportedOps = sawingOps;
+				else if (sawingOps!=null)
+					unSupportedOps.addAll(sawingOps);
+				
 				if (unSupportedOps!= null){
 					uniteArrayLists(unSupportedOps, header);
 					header.add(fileEnd);
