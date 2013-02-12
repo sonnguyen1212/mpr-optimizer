@@ -12,18 +12,20 @@ import javax.swing.JProgressBar;
 import xml.Layout;
 import xml.MprFile;
 import xml.XMLParser;
+import mpr.Parameter;
 
 public class NestingCreator {
 	public static Pattern mprLine = Pattern.compile("(\\w+)=\"(\\w+)\"");
 	public static final int PARAMETER_NAME = 1;
 	public static final int PARAMETER_VALUE = 2;
 	public static final String partDimens = "<100 \\\\WerkStck\\\\";
-	public static final String[] supportedOps = {"<102 \\\\BohrVert\\\\", "<109 \\\\Nuten\\\\"};
+	public static final String[] supportedOps = {"<102 \\\\BohrVert\\\\","<109 \\\\Nuten\\\\","<112 \\\\Tasche\\\\"};
 	public static final String vertTrimmingHeader ="<105 \\\\Konturfraesen\\\\";
 	public static final String horizBoring = "<103 \\\\BohrHoriz\\\\";
 	public static final String contourRegex = "](\\d+)";
 	public static final String contourElementRegex = "\\$E\\d+";
 	public static final String millingOperationRegex = "(\\w+=\")(\\d+)(:\\d+\")";
+	public static final String parameterHeader = "[001";
 
 	public static final String fileEnd = "!";
 	public static String PART_THICK = "DI";
@@ -36,7 +38,7 @@ public class NestingCreator {
 	private ArrayList<String> errorMsg;
 	private JProgressBar progressBar;
 	private int mprCount;
-	
+
 	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar){
 		this.parser = new XMLParser(xmlFile);
 		this.mprCount = this.parser.parse();
@@ -51,7 +53,7 @@ public class NestingCreator {
 		for (Layout currentLayout : layouts){
 			if (currentLayout==null)
 				continue;
-			
+
 			int currentContourIndex = 0;
 			ArrayList<MprFile> mprs = currentLayout.getMprFiles();
 			ArrayList<String> currentPlateContours = new ArrayList<String>();
@@ -81,7 +83,7 @@ public class NestingCreator {
 							+currentLayout.getNumber()+" was not found in the current directory");
 					continue;
 				}
-				
+
 				double xOffset = currentMpr.getXOffset();
 				double yOffset = currentMpr.getYOffset();
 				BufferedReader reader = null;;
@@ -107,6 +109,10 @@ public class NestingCreator {
 					else
 						break;
 				}
+
+				//read parameter table and analyze:
+
+
 				//check if should flip xy coordinates
 				boolean shouldFlip = mprParser.shouldFlip(currentMpr, header);
 				//contour lines
@@ -124,6 +130,8 @@ public class NestingCreator {
 					currentLine = reader.readLine();
 				}
 				reader.close();
+
+
 				//break operations to arraylist for each operation
 				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations);
 
@@ -138,14 +146,14 @@ public class NestingCreator {
 					updateIndexesContours(contoursBreaked, currentContourIndex);
 					updateIndexesMilling(vertMilling, currentContourIndex);
 					currentContourIndex += contoursBreaked.size();
-					
+
 					int index =0;
 					for (ArrayList<String> contour : contoursBreaked){
 						ArrayList<ArrayList<String>> currentContourBreaked = breakContours(contour, contourElementRegex);
 						if (shouldFlip)
 							for (int i=0 ; i<currentContourBreaked.size() ; i++)
 								mprParser.flipXYContour(currentContourBreaked.get(i), Double.toString(currentMpr.getLength()));
-						
+
 						if (xOffset>0 || yOffset>0)
 							for (int i=0 ; i<currentContourBreaked.size() ; i++)
 								mprParser.addOffsetToContour(currentContourBreaked.get(i), Double.toString(xOffset), Double.toString(yOffset));
@@ -169,14 +177,14 @@ public class NestingCreator {
 					unSupportedOps = sawingOps;
 				else if (sawingOps!=null)
 					unSupportedOps.addAll(sawingOps);
-				
+
 				if (unSupportedOps!= null){
 					uniteArrayLists(unSupportedOps, header);
 					header.add(fileEnd);
 					String fileName = currentMpr.getPartCode();
 					mprWriter.createLeftOverMpr(header, mprDirectory, fileName); 
 				}
-				
+
 				//create second side if needed
 				if (currentMpr.getSecondPartCode()!=null)
 				{
@@ -184,18 +192,18 @@ public class NestingCreator {
 					mprWriter.createLeftOverMpr(lines, mprDirectory, "Back_Ops_"+currentMpr.getPartCode());
 				}
 
-				
+
 				//add relevant plate lines
 				for (ArrayList<String> operation : operationsBreaked){
 					if (shouldFlip)
 						mprParser.flipXY(operation, Double.toString(currentMpr.getLength()));
-					
+
 					if (xOffset>0 || yOffset>0)
 						mprParser.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
 
 				}
 				uniteArrayLists(operationsBreaked, currentPlateOperations);
-				
+
 				currentMprCount++;
 				progressBar.setValue(currentMprCount/mprCount*100);
 			}
@@ -224,7 +232,7 @@ public class NestingCreator {
 			currentLine = "]" + index; //\n\r?????
 			contours.get(i).set(0, currentLine);// = currentLine;
 		}
-	
+
 	}
 
 	private void updateIndexesMilling(ArrayList<ArrayList<String>> millings, int currentPlateIndex){
@@ -305,7 +313,8 @@ public class NestingCreator {
 
 	private boolean isOperation(String currentLine)
 	{
-		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])&& !currentLine.matches(supportedOps[1]))
+		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])
+				&& !currentLine.matches(supportedOps[1])&& !currentLine.matches(supportedOps[2]))
 			return false;
 		else
 			return true;
@@ -328,8 +337,8 @@ public class NestingCreator {
 		else
 			return operationType;
 	}
-	
-	
+
+
 	private Point3D determinePlateMeasurements(Layout currentLayout, MprFile firstFile) throws IOException
 	{
 		double length = currentLayout.getLength();
@@ -360,7 +369,7 @@ public class NestingCreator {
 		}
 		return point;
 	}
-	
+
 	public static Point3D readMprAndFileDims(File mprFile) throws IOException
 	{
 		String length="", width="", thickness="";
@@ -376,10 +385,10 @@ public class NestingCreator {
 				{
 					if (match.group(PARAMETER_NAME).matches("LA"))
 						length = match.group(PARAMETER_VALUE);
-					
+
 					else if (match.group(PARAMETER_NAME).matches("BR"))
 						width = match.group(PARAMETER_VALUE);
-					
+
 					else if (match.group(PARAMETER_NAME).matches("DI"))
 					{
 						thickness = match.group(PARAMETER_VALUE);
@@ -390,8 +399,44 @@ public class NestingCreator {
 			reader.close();
 			point = new Point3D(length, width, thickness);
 
-			
+
 		}
 		return point;
+	}
+
+	private ArrayList<Parameter> createParameterList(ArrayList<String> lines)
+	{
+		ArrayList<Parameter> paramList = new ArrayList<Parameter>();
+		Parameter tempParam;
+
+		int index = 0;
+		//go over the lines until reached the parameter header
+		while (index<lines.size())
+		{
+			if (lines.get(index).matches(parameterHeader))
+				break;
+			index++;
+		}
+		//set the current line to the parameter header
+		index++;
+		Matcher match;
+		while (index<lines.size())
+		{
+			if (lines.get(index).matches("\\s*"))
+				break;
+			else
+			{
+				match = mprLine.matcher(lines.get(index));
+				if (match.find())
+				{
+					tempParam = new Parameter(match.group(PARAMETER_NAME), match.group(PARAMETER_VALUE));
+					paramList.add(tempParam);
+					index++;
+					index++;
+				}
+			}
+		}
+
+		return paramList;
 	}
 }

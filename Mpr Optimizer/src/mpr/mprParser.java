@@ -74,22 +74,27 @@ public class mprParser {
 
 
 	public static void flipXY(ArrayList<String> lines, String yLen) {
-		String oldXA = "", oldYA = "", oldXE = "", oldYE = "";
+		String oldXA = "", oldYA = "", oldXE = "", oldYE = "",oldLength = "", oldWidth = "";
 		for (String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
 			if (mprMatcher.find()) {
-				if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("XA")) {
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
 					oldXA = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
-				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("XE")) {
+					
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XE")) {
 					oldXE = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
-				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("YA")) {
+					
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YA")) {
 					oldYA = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
-				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("YE")) {
+					
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YE")) {
 					oldYE = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+					
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("LA")) {
+					oldLength = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+					
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("BR")) {
+					oldWidth = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
 				}
 			}
 		}
@@ -97,19 +102,25 @@ public class mprParser {
 		for(String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
 			if (mprMatcher.find()) {
-				if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("XA")) {
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
 					line = "XA=\"" + yLen + "-(" + oldYA + ")\"";
-				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("XE")) {
+				
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XE")) {
 					line = "XE=\"" + yLen + "-(" + oldYE + ")\"";
-
-				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("YA")) {
+				
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YA")) {
 					line = "YA=\"" + oldXA + "\"";
-				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME)
-						.equals("YE")) {
+				
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YE")) {
 					line = "YE=\"" + oldXE + "\"";
+				
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("LA")) {
+					if (oldWidth.equals(""))
+						continue;
+					line = "LA=\"" + oldWidth + "\"";
+				
+				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("BR")) {
+					line = "BR=\"" + oldLength + "\"";
 				}
 				lines.set(index, line);
 			}
