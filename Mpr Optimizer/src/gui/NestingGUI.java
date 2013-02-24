@@ -41,9 +41,7 @@ import serial.LocalVerifier;
 import serial.RemoteVerifier;
 import javax.swing.JProgressBar;
 
-
 public class NestingGUI {
-
 
 	private static final String LICENSE_FILE = "\\License\\license.data";
 
@@ -66,6 +64,7 @@ public class NestingGUI {
 	private boolean isXMLFileSelected;
 	private boolean isMPRDestDirSelected;
 	private JProgressBar progressBar;
+	private static LocalVerifier localVerifier;
 
 	/**
 	 * Launch the application.
@@ -92,9 +91,8 @@ public class NestingGUI {
 		initialize();
 	}
 
-
 	private void localVerifyLicense() {
-		LocalVerifier localVerifier = new LocalVerifier(homeFolder);
+		localVerifier = new LocalVerifier(homeFolder);
 		File license = new File(homeFolder.getAbsolutePath() + LICENSE_FILE);
 		String serial = "";
 		if (!license.exists()) {
@@ -105,8 +103,10 @@ public class NestingGUI {
 
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						StringSelection clipBoard = new StringSelection(macField.getText());
-						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(clipBoard, null);
+						StringSelection clipBoard = new StringSelection(
+								macField.getText());
+						Toolkit.getDefaultToolkit().getSystemClipboard()
+								.setContents(clipBoard, null);
 					}
 				});
 				macField.setText(LocalVerifier.getCurrentMac());
@@ -114,11 +114,13 @@ public class NestingGUI {
 				final JTextField serialField = new JTextField();
 				final JComponent[] inputs = new JComponent[] {
 						new JLabel("Serial not found."),
-						new JLabel("Please send an e-mail with the following address:"),
-						macField, copyButton, 
-						new JLabel("Enter your serial:"),serialField};
+						new JLabel(
+								"Please send an e-mail with the following address:"),
+						macField, copyButton, new JLabel("Enter your serial:"),
+						serialField };
 
-				JOptionPane.showMessageDialog(frame, inputs, "Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(frame, inputs,
+						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
 				serial = serialField.getText();
 			} catch (HeadlessException e) {
 				e.printStackTrace();
@@ -126,13 +128,27 @@ public class NestingGUI {
 				e.printStackTrace();
 			}
 			localVerifier.createLicense(serial);
-			if (!localVerifier.verify()) {
-				JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+			int verifierResult = localVerifier.verify();
+			if (verifierResult != LocalVerifier.LICENSE_MATCH) {
+				if (verifierResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
+					JOptionPane.showMessageDialog(null, "Keys don't match",
+							"Error!", JOptionPane.ERROR_MESSAGE);
+				} else if (verifierResult == LocalVerifier.LICENSE_EXPIRED) {
+					JOptionPane.showMessageDialog(null, "License Expired",
+							"Error!", JOptionPane.ERROR_MESSAGE);
+				}
 				System.exit(-1);
 			}
 		} else {
-			if (!localVerifier.verify()) {
-				JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+			int verifierResult = localVerifier.verify();
+			if (verifierResult != LocalVerifier.LICENSE_MATCH) {
+				if (verifierResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
+					JOptionPane.showMessageDialog(null, "Keys don't match",
+							"Error!", JOptionPane.ERROR_MESSAGE);
+				} else if (verifierResult == LocalVerifier.LICENSE_EXPIRED) {
+					JOptionPane.showMessageDialog(null, "License Expired",
+							"Error!", JOptionPane.ERROR_MESSAGE);
+				}
 				System.exit(-1);
 			}
 		}
@@ -145,23 +161,28 @@ public class NestingGUI {
 			File license = new File(LICENSE_FILE);
 			String serial = "";
 			if (!license.exists()) {
-				serial = JOptionPane.showInputDialog(frame, "Serial not found.\nPlease enter serial number:",
+				serial = JOptionPane.showInputDialog(frame,
+						"Serial not found.\nPlease enter serial number:",
 						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
 				if (remoteVerifier.verify(serial) != 1) {
-					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Keys don't match",
+							"Error!", JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
 				} else {
 					License serialObject = new License(serial);
-					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(license));
+					ObjectOutputStream oos = new ObjectOutputStream(
+							new FileOutputStream(license));
 					oos.writeObject(serialObject);
 					oos.close();
 				}
 			} else {
-				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(license));
+				ObjectInputStream ois = new ObjectInputStream(
+						new FileInputStream(license));
 				License serialObject = (License) ois.readObject();
 				ois.close();
 				if (remoteVerifier.verify(serialObject.getSerial()) != 1) {
-					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Keys don't match",
+							"Error!", JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
 				}
 
@@ -194,6 +215,7 @@ public class NestingGUI {
 		progressBar.setValue(0);
 		frame.repaint();
 	}
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -209,7 +231,8 @@ public class NestingGUI {
 		} catch (UnsupportedLookAndFeelException e1) {
 			e1.printStackTrace();
 		}
-		String path = NestingGUI.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		String path = NestingGUI.class.getProtectionDomain().getCodeSource()
+				.getLocation().getPath();
 		String decodedPath = null;
 
 		try {
@@ -226,8 +249,7 @@ public class NestingGUI {
 		frame.setBounds(100, 100, 600, 500);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-		//Menu Bar:
+		// Menu Bar:
 		menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 
@@ -259,14 +281,15 @@ public class NestingGUI {
 		menuBar.add(mnAbout);
 		frame.getContentPane().setLayout(null);
 
-		//Gui
+		// Gui
 		lblXmlFile = new JLabel("XML File");
 		lblXmlFile.setFont(new Font("Lucida Grande", Font.BOLD, 18));
 		lblXmlFile.setBounds(20, 37, 87, 29);
 		frame.getContentPane().add(lblXmlFile);
 
 		lblWoodwopFilesDirectory = new JLabel("WoodWop Files:");
-		lblWoodwopFilesDirectory.setFont(new Font("Lucida Grande", Font.BOLD, 18));
+		lblWoodwopFilesDirectory.setFont(new Font("Lucida Grande", Font.BOLD,
+				18));
 		lblWoodwopFilesDirectory.setBounds(20, 89, 156, 29);
 		frame.getContentPane().add(lblWoodwopFilesDirectory);
 
@@ -275,8 +298,9 @@ public class NestingGUI {
 		btnGenerateNesting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ArrayList<String> errorMessages = new ArrayList<>();
-				NestingCreator nestingCreator = new NestingCreator
-						(xmlFilePath.getText(), mprPath.getText(), errorMessages,progressBar);
+				NestingCreator nestingCreator = new NestingCreator(xmlFilePath
+						.getText(), mprPath.getText(), errorMessages,
+						progressBar);
 				try {
 					txtrStatusBar.setText("Status: Processing..");
 					nestingCreator.createLayoutMprs();
@@ -284,16 +308,15 @@ public class NestingGUI {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(frame,
 							"Unknown error occured, please contact support");
-					//write error log!!!!!!!!!
+					// write error log!!!!!!!!!
 				}
-				if (errorMessages.size() == 0)
-				{
+				if (errorMessages.size() == 0) {
 					txtrStatusBar.setText("All Files Created Succesfully.");
-					JOptionPane.showMessageDialog(frame, "All Files Created Succesfully.");
-				}else{
+					JOptionPane.showMessageDialog(frame,
+							"All Files Created Succesfully.");
+				} else {
 					String resultString = "";
-					for (String currentLine : errorMessages)
-					{
+					for (String currentLine : errorMessages) {
 						resultString = resultString.concat(currentLine + "\n");
 					}
 					txtrStatusBar.setText(resultString);
@@ -323,16 +346,17 @@ public class NestingGUI {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser(homeFolder);
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				FileNameExtensionFilter xmlExtensionFilter = new FileNameExtensionFilter("XML File (*.xml)", "xml");
+				FileNameExtensionFilter xmlExtensionFilter = new FileNameExtensionFilter(
+						"XML File (*.xml)", "xml");
 				fileChooser.setFileFilter(xmlExtensionFilter);
 				fileChooser.setDialogTitle("Choose your XML file:");
 				fileChooser.setBounds(6, 6, 550, 400);
 				int result = fileChooser.showOpenDialog(frame);
-				if(result == JFileChooser.APPROVE_OPTION) {
+				if (result == JFileChooser.APPROVE_OPTION) {
 					File selectedXML = fileChooser.getSelectedFile();
 					xmlFilePath.setText(selectedXML.getAbsolutePath());
 					isXMLFileSelected = true;
-					if(isMPRDestDirSelected) {
+					if (isMPRDestDirSelected) {
 						btnGenerateNesting.setEnabled(true);
 					}
 					homeFolder = new File(selectedXML.getAbsolutePath());
@@ -350,11 +374,11 @@ public class NestingGUI {
 				fileChooser.setDialogTitle("Choose your destionation folder:");
 				fileChooser.setBounds(6, 6, 550, 400);
 				int result = fileChooser.showOpenDialog(frame);
-				if(result == JFileChooser.APPROVE_OPTION) {
+				if (result == JFileChooser.APPROVE_OPTION) {
 					File selectedDir = fileChooser.getSelectedFile();
 					mprPath.setText(selectedDir.getAbsolutePath());
 					isMPRDestDirSelected = true;
-					if(isXMLFileSelected) {
+					if (isXMLFileSelected) {
 						btnGenerateNesting.setEnabled(true);
 					}
 					homeFolder = selectedDir;
@@ -370,11 +394,11 @@ public class NestingGUI {
 		txtrStatusBar.setBounds(20, 228, 558, 201);
 		frame.getContentPane().add(txtrStatusBar);
 
-		//xmlFilePath.setText("c:\\\\test\\\\xml.xml");
-		//mprPath.setText("c:\\\\test\\\\mpr\\\\");
-		//btnGenerateNesting.setEnabled(true);
+		// xmlFilePath.setText("c:\\\\test\\\\xml.xml");
+		// mprPath.setText("c:\\\\test\\\\mpr\\\\");
+		// btnGenerateNesting.setEnabled(true);
 
-		progressBar = new JProgressBar(0,100);
+		progressBar = new JProgressBar(0, 100);
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
 		progressBar.setBounds(20, 196, 558, 20);

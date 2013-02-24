@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -16,6 +17,9 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+
+import mpr.NestingCreator;
+import mpr.Point3D;
 
 public class CSVMaker {
 
@@ -97,15 +101,27 @@ public class CSVMaker {
 					if (selectedFiles[0].isDirectory()) {
 						getMprFiles(selectedFiles[0]);
 					} else {
-						for(File file: selectedFiles) {
+						for (File file : selectedFiles) {
 							mprFiles.add(file);
 						}
 					}
 				}
+				fillTable();
 			}
 		});
 		btnSelectFiles.setBounds(10, 445, 137, 60);
 		frame.getContentPane().add(btnSelectFiles);
+	}
+
+	private void fillTable() {
+		for (File file : mprFiles) {
+			try {
+				Point3D point = NestingCreator.readMprAndFileDims(file);
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void getMprFiles(File sourceDir) {

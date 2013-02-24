@@ -19,6 +19,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
@@ -35,6 +36,9 @@ public class LocalVerifier {
 	private final String LICENSE_FOLDER = File.separator + "License";
 	private final String KEY_FILE = File.separator + "license.key";
 	private final String LICENSE_FILE = File.separator + "license.data";
+	public static final int LICENSE_EXPIRED = -1;
+	public static final int LICENSE_KEYS_DONT_MATCH = -2;
+	public static final int LICENSE_MATCH = 0;
 
 	private File homeFolder;
 
@@ -129,16 +133,19 @@ public class LocalVerifier {
 		return result;
 	}
 
-	public boolean verify() {
+	public int verify() {
 		License license = loadLicense();
 		if (license != null) {
 			try {
+				if (license.getExpirationDate().before(new Date())) {
+					return LICENSE_EXPIRED;
+				}
 				ArrayList<String> macs = getAllAdresses();
 				for (String mac : macs) {
 					// TO REMOVE
 					String md5key = md5(mac);
 					if (md5key.equals(license.getSerial())) {
-						return true;
+						return LICENSE_MATCH;
 					}
 				}
 				// String mac = getCurrentMac();
@@ -155,7 +162,7 @@ public class LocalVerifier {
 				// }
 			}
 		}
-		return false;
+		return LICENSE_KEYS_DONT_MATCH;
 	}
 
 	private License loadLicense() {
@@ -216,7 +223,7 @@ public class LocalVerifier {
 			ip = InetAddress.getLocalHost();
 			NetworkInterface network;
 			network = NetworkInterface.getByInetAddress(ip);
-			if(network == null) {
+			if (network == null) {
 				return "1234456";
 			}
 			byte[] mac = network.getHardwareAddress();
