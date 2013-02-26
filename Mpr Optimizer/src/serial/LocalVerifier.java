@@ -51,6 +51,19 @@ public class LocalVerifier {
 		SecretKey key = loadKey();
 		try {
 			License license = new License(serial);
+			ArrayList<String> macs = getAllAdresses();
+			for (String mac : macs) {
+				// TO REMOVE
+				String md5Full = md5(mac + "full");
+				String md5Limited = md5(mac + "limited");
+				if (md5Full.equals(serial)) {
+					license.setLimited(false);
+					break;
+				} else if (md5Limited.equals(serial)) {
+					license.setLimited(true);
+					break;
+				}
+			}
 			// Create Cipher
 			Cipher desCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
 			desCipher.init(Cipher.ENCRYPT_MODE, key);
@@ -137,16 +150,22 @@ public class LocalVerifier {
 		License license = loadLicense();
 		if (license != null) {
 			try {
-				if (license.getExpirationDate().before(new Date())) {
-					return LICENSE_EXPIRED;
+				if (license.isLimited()) {
+					if (license.getExpirationDate().before(new Date())
+							|| license.getCreatingDate().after(new Date())) {
+						return LICENSE_EXPIRED;
+					}
 				}
 				ArrayList<String> macs = getAllAdresses();
 				for (String mac : macs) {
-					// TO REMOVE
-					String md5key = md5(mac);
-					if (md5key.equals(license.getSerial())) {
+					String md5Full = md5(mac + "full");
+					String md5Limited = md5(mac + "limited");
+					if (md5Full.equals(license.getSerial())) {
+						return LICENSE_MATCH;
+					} else if (md5Limited.equals(license.getSerial())) {
 						return LICENSE_MATCH;
 					}
+
 				}
 				// String mac = getCurrentMac();
 				// String md5key = md5(mac);
