@@ -8,7 +8,8 @@ import xml.MprFile;
 
 public class mprParser {
 
-	public static Pattern mprLine = Pattern.compile("(\\w+)=\"([.\\-\\+\\(\\)\\w]+)\"");
+	//maybe ? could be a problem in mprLine
+	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\-\\+\\(\\)\\w]+)\"?");
 	public static Pattern contourLine = Pattern.compile("(\\w)=([.\\+\\-\\(\\)\\w]+)");
 
 	public static final String xContour = "X";
@@ -23,7 +24,10 @@ public class mprParser {
 		int index=0;
 		for (String line : lines) {
 			Matcher contourMatcher = contourLine.matcher(line);
-			if (contourMatcher.find()) {
+			// if problem : try to replace with this:
+			//			if (contourMatcher.find()) {
+
+			if (contourMatcher.matches()) {
 				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
 					line = xContour + "="+ contourMatcher.group(NestingCreator.PARAMETER_VALUE) 
 							+ "+" + xOffset ;
@@ -160,10 +164,12 @@ public class mprParser {
 	{
 		for(String line: header) {
 				Matcher mprMatcher = mprLine.matcher(line);
-				if(mprMatcher.find() && mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("LA")){
+				if(mprMatcher.find() && (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("_BSX") || 
+						mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("LA")))
+				{
 					String valueString = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
 					double valueDouble = Double.parseDouble(valueString);
-					if(Math.abs(valueDouble - currentMpr.getLength()) < 0.01) {
+					if(Math.abs(valueDouble - currentMpr.getLength()) < 0.06) {
 						return false;
 					}
 					else {

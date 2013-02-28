@@ -15,7 +15,11 @@ import xml.XMLParser;
 import mpr.Parameter;
 
 public class NestingCreator {
-	public static Pattern mprLine = Pattern.compile("(\\w+)=\"(\\w+)\"");
+	
+	//maybe ? could be a problem in mprLine
+	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\-\\+\\(\\)\\w]+)\"?");
+	public static Pattern lineStructForParam = Pattern.compile("(\\w+=\"?)(\\w+)(\"?)");
+
 	public static final int PARAMETER_NAME = 1;
 	public static final int PARAMETER_VALUE = 2;
 	public static final String partDimens = "<100 \\\\WerkStck\\\\";
@@ -25,7 +29,7 @@ public class NestingCreator {
 	public static final String contourRegex = "](\\d+)";
 	public static final String contourElementRegex = "\\$E\\d+";
 	public static final String millingOperationRegex = "(\\w+=\")(\\d+)(:\\d+\")";
-	public static final String parameterHeader = "[001";
+	public static final String parameterHeader = "\\[001";
 
 	public static final String fileEnd = "!";
 	public static String PART_THICK = "DI";
@@ -38,14 +42,17 @@ public class NestingCreator {
 	private ArrayList<String> errorMsg;
 	private JProgressBar progressBar;
 	private int mprCount;
+	private boolean checkParameters, sawingSeperate;
 
-	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar){
+	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar, boolean param, boolean sawing){
 		this.parser = new XMLParser(xmlFile);
 		this.mprCount = this.parser.parse();
 		this.layouts = parser.getLayouts();
 		this.errorMsg = errorMsg;
 		this.progressBar = bar;
 		this.mprDirectory = mprDirectory;
+		this.checkParameters = param;
+		this.sawingSeperate = sawing;
 	}
 
 	public void createLayoutMprs () throws IOException{
@@ -83,6 +90,8 @@ public class NestingCreator {
 							+currentLayout.getNumber()+" was not found in the current directory");
 					continue;
 				}
+				ArrayList<Parameter> currentMprParameters = null;
+
 
 				double xOffset = currentMpr.getXOffset();
 				double yOffset = currentMpr.getYOffset();
@@ -99,7 +108,7 @@ public class NestingCreator {
 
 				String currentLine = null;
 
-				//seperate file header
+				//seperate file header - run until contourRegex or isOperation
 				while (reader.ready())
 				{
 					currentLine = reader.readLine();
@@ -111,19 +120,36 @@ public class NestingCreator {
 				}
 
 				//read parameter table and analyze:
+				if (checkParameters)
+				{
+					currentMprParameters = new ArrayList<Parameter>();
+					currentMprParameters = createParameterList(header);
+				}
 
 
-				//check if should flip xy coordinates
-				boolean shouldFlip = mprParser.shouldFlip(currentMpr, header);
-				//contour lines
+				//If stopped at contour regex - copy contour lines 
 				if (currentLine.matches(contourRegex)){
-					while (reader.ready() && !isOperation(currentLine))
+					while (reader.ready() && !isOperation(currentLine) && !currentLine.matches(partDimens))
 					{
 						contours.add(currentLine);
 						currentLine = reader.readLine();
 					}
 				}
-				//operations lines
+
+				//check if should add the WerkSteck part to the header
+				if (currentLine.matches(partDimens))
+				{
+					while (reader.ready() && !isOperation(currentLine))
+					{
+						header.add(currentLine);
+						currentLine = reader.readLine();
+					}
+				}
+
+				//check if should flip xy coordinates
+				boolean shouldFlip = mprParser.shouldFlip(currentMpr, header);
+
+				//Add operations lines
 				while (reader.ready() && !currentLine.matches(fileEnd))
 				{
 					operations.add(currentLine);
@@ -133,7 +159,7 @@ public class NestingCreator {
 
 
 				//break operations to arraylist for each operation
-				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations);
+				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations); 
 
 				//if there are contours in the file, break the contours to seperate contours and extract the vertTrimming
 				if (!contours.isEmpty())
@@ -164,6 +190,12 @@ public class NestingCreator {
 						index++;
 					}
 
+					if (currentMprParameters!= null && currentMprParameters.size()>0)
+					{
+						replaceParamForArrayListOfArrayList(vertMilling, currentMprParameters);
+						replaceParamForArrayListOfArrayList(contoursBreaked, currentMprParameters);
+					}
+
 					uniteArrayLists(vertMilling, currentPlateMillings);
 					uniteArrayLists(contoursBreaked, currentPlateContours);
 
@@ -171,13 +203,18 @@ public class NestingCreator {
 
 				//createLeftOverMPR
 				ArrayList<ArrayList<String>> unSupportedOps = extractSpecificOpType(operationsBreaked, horizBoring);
-				ArrayList<ArrayList<String>> sawingOps = extractSpecificOpType(operationsBreaked, supportedOps[1]);
-				//check if needed to add the sawing (if it exists)
-				if (unSupportedOps==null)
-					unSupportedOps = sawingOps;
-				else if (sawingOps!=null)
-					unSupportedOps.addAll(sawingOps);
+				if (sawingSeperate)
+				{
+					ArrayList<ArrayList<String>> sawingOps = extractSpecificOpType(operationsBreaked, supportedOps[1]);
+					//if unSupportedOps is null - replace it with sawingUp
+					if (unSupportedOps==null)
+						unSupportedOps = sawingOps;
+					//if it's not - and sawing is not null - add sawing to unSupportedOps
+					else if (sawingOps!=null)
+						unSupportedOps.addAll(sawingOps);
+				}
 
+				//in anycase if there are unsupported ops - create a leftOver file
 				if (unSupportedOps!= null){
 					uniteArrayLists(unSupportedOps, header);
 					header.add(fileEnd);
@@ -202,10 +239,19 @@ public class NestingCreator {
 						mprParser.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
 
 				}
+				
+				//check if should replace parameters
+				if (currentMprParameters!= null && currentMprParameters.size()>0)
+				{
+					replaceParamForArrayListOfArrayList(operationsBreaked, currentMprParameters);
+				}
+
 				uniteArrayLists(operationsBreaked, currentPlateOperations);
 
 				currentMprCount++;
 				progressBar.setValue(currentMprCount/mprCount*100);
+
+
 			}
 
 			//createPlateFile:
@@ -213,6 +259,8 @@ public class NestingCreator {
 			allPlateLines.addAll(currentPlateContours);
 			allPlateLines.addAll(currentPlateMillings);
 			allPlateLines.addAll(currentPlateOperations);
+
+
 			mprWriter.createPlateMpr(plateMeasurements, allPlateLines, mprDirectory, "Plate"+ currentLayout.getNumber()+".mpr");
 
 		}
@@ -356,8 +404,7 @@ public class NestingCreator {
 				match = mprLine.matcher(currentLine);
 				if (match.find())
 				{
-					System.out.println(match.group(PARAMETER_NAME).matches("DI"));
-					if (match.group(PARAMETER_NAME).matches("DI"))
+					if (match.group(PARAMETER_NAME).matches("_BSZ") || match.group(PARAMETER_NAME).matches("DI"))
 					{
 						thickness = match.group(PARAMETER_VALUE);
 						break;
@@ -383,13 +430,13 @@ public class NestingCreator {
 				match = mprLine.matcher(currentLine);
 				if (match.find())
 				{
-					if (match.group(PARAMETER_NAME).matches("LA"))
+					if (match.group(PARAMETER_NAME).matches("_BSX") || match.group(PARAMETER_NAME).matches("LA"))
 						length = match.group(PARAMETER_VALUE);
 
-					else if (match.group(PARAMETER_NAME).matches("BR"))
+					else if (match.group(PARAMETER_NAME).matches("_BSY") || match.group(PARAMETER_NAME).matches("BR"))
 						width = match.group(PARAMETER_VALUE);
 
-					else if (match.group(PARAMETER_NAME).matches("DI"))
+					else if (match.group(PARAMETER_NAME).matches("_BSZ") || match.group(PARAMETER_NAME).matches("DI"))
 					{
 						thickness = match.group(PARAMETER_VALUE);
 						break;
@@ -417,26 +464,70 @@ public class NestingCreator {
 				break;
 			index++;
 		}
-		//set the current line to the parameter header
-		index++;
+
+		index++; //set the current line to the first parameter header
 		Matcher match;
-		while (index<lines.size())
+		while (index<lines.size() && !lines.get(index).matches("\\s*") )
 		{
-			if (lines.get(index).matches("\\s*"))
-				break;
-			else
+			match = mprLine.matcher(lines.get(index));
+			if (match.find())
 			{
-				match = mprLine.matcher(lines.get(index));
-				if (match.find())
+				if (!match.group(PARAMETER_NAME).matches("KM"))
 				{
-					tempParam = new Parameter(match.group(PARAMETER_NAME), match.group(PARAMETER_VALUE));
+					tempParam = new Parameter(match.group(PARAMETER_NAME), replaceParamByValue(match.group(PARAMETER_VALUE), paramList));
 					paramList.add(tempParam);
-					index++;
-					index++;
 				}
 			}
+			index++;
+
 		}
 
 		return paramList;
 	}
+
+	private String replaceParamByValue(String line, ArrayList<Parameter> paramList)
+	{
+		if (paramList == null || paramList.size()==0)
+			return line;
+
+		String temp = line;
+		for (int i=0 ; i<paramList.size() ; i++)
+		{
+			temp = paramList.get(i).replaceParameterByVal(temp);
+		}
+		return temp;
+	}
+
+	private void replaceParamForArrayList (ArrayList<String> lines,  ArrayList<Parameter> paramList)
+	{
+		if (lines==null)
+			return;
+
+		String temp;
+		Matcher matcher;
+		for (int i=0 ; i<lines.size(); i++)
+		{
+			matcher = lineStructForParam.matcher(lines.get(i));
+			if (matcher.matches())
+			{
+				temp = matcher.group(1) + replaceParamByValue(matcher.group(2), paramList)+matcher.group(3);
+				lines.set(i, temp);
+			}
+		}
+	}
+
+
+	private void replaceParamForArrayListOfArrayList (ArrayList<ArrayList<String>> lines,  ArrayList<Parameter> paramList)
+	{
+		if (lines==null)
+			return;
+
+		for (int i=0 ; i<lines.size(); i++)
+		{
+			replaceParamForArrayList(lines.get(i), paramList);
+		}
+	}
+
+
+
 }

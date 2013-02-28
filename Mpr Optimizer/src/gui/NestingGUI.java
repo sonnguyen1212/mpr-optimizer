@@ -40,6 +40,12 @@ import serial.License;
 import serial.LocalVerifier;
 import serial.RemoteVerifier;
 import javax.swing.JProgressBar;
+import javax.swing.JPanel;
+import javax.swing.JCheckBox;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
 public class NestingGUI {
 
@@ -60,6 +66,8 @@ public class NestingGUI {
 	private JButton btnXmlBrowse;
 	private JButton btnMprBrowse;
 	private JTextArea txtrStatusBar;
+	private JCheckBox chckbxParameters;
+	private JComboBox<String> sawingCombo;
 	private File homeFolder;
 	private boolean isXMLFileSelected;
 	private boolean isMPRDestDirSelected;
@@ -246,7 +254,7 @@ public class NestingGUI {
 		isMPRDestDirSelected = false;
 		isXMLFileSelected = false;
 		frame = new JFrame("Nesting MPR Generator");
-		frame.setBounds(100, 100, 600, 500);
+		frame.setBounds(100, 100, 604, 630);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// Menu Bar:
@@ -297,14 +305,16 @@ public class NestingGUI {
 		btnGenerateNesting.setEnabled(false);
 		btnGenerateNesting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				boolean checkParameter = chckbxParameters.isSelected();
+				boolean sawingSeperate = ((String)sawingCombo.getSelectedItem()).matches("Seperate Machining")?true:false;
 				ArrayList<String> errorMessages = new ArrayList<>();
 				NestingCreator nestingCreator = new NestingCreator(xmlFilePath
 						.getText(), mprPath.getText(), errorMessages,
-						progressBar);
+						progressBar, checkParameter, sawingSeperate);
 				try {
 					txtrStatusBar.setText("Status: Processing..");
 					nestingCreator.createLayoutMprs();
-				} catch (IOException e1) {
+				} catch (Exception e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(frame,
 							"Unknown error occured, please contact support");
@@ -389,6 +399,7 @@ public class NestingGUI {
 		frame.getContentPane().add(btnMprBrowse);
 
 		txtrStatusBar = new JTextArea();
+		txtrStatusBar.setFont(new Font("Courier New", Font.PLAIN, 12));
 		txtrStatusBar.setEditable(false);
 		txtrStatusBar.setText("Status");
 		txtrStatusBar.setBounds(20, 228, 558, 201);
@@ -403,5 +414,32 @@ public class NestingGUI {
 		progressBar.setStringPainted(true);
 		progressBar.setBounds(20, 196, 558, 20);
 		frame.getContentPane().add(progressBar);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel.setBounds(20, 447, 554, 109);
+		frame.getContentPane().add(panel);
+		panel.setLayout(null);
+		
+		JLabel lblOptions = new JLabel("Options:");
+		lblOptions.setFont(new Font("Tahoma", Font.BOLD, 16));
+		lblOptions.setBounds(10, 11, 76, 26);
+		panel.add(lblOptions);
+		
+		chckbxParameters = new JCheckBox("Check And Replace Parameters");
+		chckbxParameters.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		chckbxParameters.setBounds(6, 44, 222, 23);
+		panel.add(chckbxParameters);
+		
+		JLabel lblSawingOperationPosition = new JLabel("Sawing Operation Position:");
+		lblSawingOperationPosition.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblSawingOperationPosition.setBounds(10, 76, 183, 22);
+		panel.add(lblSawingOperationPosition);
+		
+		sawingCombo = new JComboBox<>();
+		sawingCombo.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		sawingCombo.setModel(new DefaultComboBoxModel<String>(new String[] {"Seperate Machining", "Nesting Machining"}));
+		sawingCombo.setBounds(188, 74, 183, 25);
+		panel.add(sawingCombo);
 	}
 }
