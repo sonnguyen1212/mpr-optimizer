@@ -203,7 +203,7 @@ public class CSVMaker {
 				writer.print(point.getY() + ","); // Width
 				writer.print("1,"); // Qty
 				writer.print(","); // Rotate
-				writer.print(point.getY() + ","); // Material
+				writer.print(point.getZ() + ","); // Material
 				writer.print(fileName + ","); // PartCode
 				writer.print(","); // Top
 				writer.print(","); // Left
