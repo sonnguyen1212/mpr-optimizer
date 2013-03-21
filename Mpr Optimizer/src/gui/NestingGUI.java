@@ -35,6 +35,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import mpr.NestingCreator;
+import mpr.OptionsManager;
 
 import serial.License;
 import serial.LocalVerifier;
@@ -84,7 +85,7 @@ public class NestingGUI {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
 					// window.remoteVerifyLicense();
-					window.localVerifyLicense();
+					//window.localVerifyLicense();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -308,9 +309,18 @@ public class NestingGUI {
 				boolean checkParameter = chckbxParameters.isSelected();
 				boolean sawingSeperate = ((String)sawingCombo.getSelectedItem()).matches("Seperate Machining")?true:false;
 				ArrayList<String> errorMessages = new ArrayList<>();
+				
+				OptionsManager options=null;
+				try {
+					options = new OptionsManager();
+				} catch (IOException e2) {
+					JOptionPane.showMessageDialog(frame,
+							"Problem Reading Configurations File");
+				}
+				
 				NestingCreator nestingCreator = new NestingCreator(xmlFilePath
 						.getText(), mprPath.getText(), errorMessages,
-						progressBar, checkParameter, sawingSeperate);
+						progressBar, checkParameter, sawingSeperate, options);
 				try {
 					txtrStatusBar.setText("Status: Processing..");
 					nestingCreator.createLayoutMprs();

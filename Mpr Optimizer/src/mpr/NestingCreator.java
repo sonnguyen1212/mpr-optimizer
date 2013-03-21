@@ -5,14 +5,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.swing.JProgressBar;
+
 import xml.Layout;
 import xml.MprFile;
 import xml.XMLParser;
-import mpr.Parameter;
 
 public class NestingCreator {
 
@@ -44,11 +46,12 @@ public class NestingCreator {
 	private ArrayList<String> errorMsg;
 	private JProgressBar progressBar;
 	private int mprCount;
-	private boolean checkParameters, sawingSeperate;
-	private boolean checkComponents=true;
-	private String mprMergePath="c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\mprmerge.exe ", mprMergeArgs=" -v -ko ", componentsDir = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1\\\\ml4\\\\",a1path = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1"; 
+	private boolean checkParameters, sawingSeperate,checkComponents;
+	private OptionsManager options;
+	//private String mprMergePath="c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\mprmerge.exe ", mprMergeArgs=" -v -ko ", componentsDir = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1\\\\ml4\\\\",a1path = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1"; 
+	private String mprMergePath="", mprMergeArgs="", componentsDir = "",a1path = ""; 
 
-	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar, boolean param, boolean sawing){
+	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar, boolean param, boolean sawing, OptionsManager options){
 		this.parser = new XMLParser(xmlFile);
 		this.mprCount = this.parser.parse();
 		this.layouts = parser.getLayouts();
@@ -57,6 +60,16 @@ public class NestingCreator {
 		this.mprDirectory = mprDirectory;
 		this.checkParameters = param;
 		this.sawingSeperate = sawing;
+		this.options = options;
+
+		this.checkComponents= param; 
+		if (checkComponents)
+		{
+			mprMergePath = this.options.getProperty("mprMergePath");
+			mprMergeArgs = this.options.getProperty("mprMergeArgs");
+			componentsDir = this.options.getProperty("componentsDir");
+			a1path = this.options.getProperty("a1path");
+		}
 	}
 
 	public void createLayoutMprs () throws IOException{
@@ -86,8 +99,10 @@ public class NestingCreator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			for (MprFile currentMpr:mprs)
-			{
+			for (int mprIndex=0; mprIndex<mprs.size() ; mprIndex++){
+				MprFile currentMpr = mprs.get(mprIndex);
+				//for (MprFile currentMpr:mprs)
+				//{
 				File mprFile = mprWriter.findFile(currentMpr.getPartCode(), mprDirectory);
 				if (mprFile==null){
 					errorMsg.add("File " + currentMpr.getPartCode() + " from plate #"
@@ -170,7 +185,7 @@ public class NestingCreator {
 				{
 					ArrayList<ArrayList<String>> components = extractSpecificOpType(operationsBreaked, componentHeader);
 					//check if there are componenets and if it's not an already merged file
-					if (!mprFile.getAbsolutePath().endsWith("_merged.mpr") && components.size()>0)
+					if (!mprFile.getAbsolutePath().endsWith("_merged.mpr") && components!=null)
 					{
 						String commandLine = analyzeComponents(components);
 						String newFileName = mprFile.getAbsolutePath();
@@ -180,15 +195,17 @@ public class NestingCreator {
 						StringBuilder finalCommand = new StringBuilder();
 						finalCommand.append(mprMergePath);
 						finalCommand.append("-a="+newFile.getAbsolutePath());
-						finalCommand.append("-m="+mprFile.getAbsolutePath());
+						finalCommand.append(" -m="+mprFile.getAbsolutePath());
 						finalCommand.append(mprMergeArgs);
 						finalCommand.append("-p=" + a1path);
-						finalCommand.append(mprFile.getAbsolutePath());
+						finalCommand.append(" -e=c:\\\\test\\\\log.log ");
+						//finalCommand.append(mprFile.getAbsolutePath());
+						finalCommand.append(" [ " + mprFile.getAbsolutePath() + " 0,0,0 1,1,1 0,0,0 ] ");
 						finalCommand.append(commandLine);
-						finalCommand.append(" [ " + mprFile.getAbsolutePath() + "0,0,0 1,1,1 0,0,0 ] ");
 						System.out.println(finalCommand.toString());
-						Process tr = Runtime.getRuntime().exec(finalCommand.toString());
-						
+						//Runtime.getRuntime().exec(finalCommand.toString());
+
+						Process p = Runtime.getRuntime().exec(finalCommand.toString());
 						MprFile newMpr = currentMpr;
 						newMpr.setPartCode(newFile.getName());
 						mprs.add(newMpr);
@@ -397,7 +414,7 @@ public class NestingCreator {
 	private boolean isOperation(String currentLine)
 	{
 		if (!currentLine.matches(horizBoring) && !currentLine.matches(vertTrimmingHeader) && !currentLine.matches(supportedOps[0])
-				&& !currentLine.matches(supportedOps[1])&& !currentLine.matches(supportedOps[2]))
+				&& !currentLine.matches(supportedOps[1])&& !currentLine.matches(supportedOps[2]) && !currentLine.matches(componentHeader))
 			return false;
 		else
 			return true;
@@ -588,14 +605,14 @@ public class NestingCreator {
 						name = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
 					}
 				}
-				args.append(componentsDir);
-				args.append(name + " ");
-				args.append(x + "," + y + "," +z);
-				args.append(" 1,1,1 0,0,0 ");
-				args.append("]");
 			}
+			args.append(componentsDir);
+			args.append(name + " ");
+			args.append(x + "," + y + "," +z);
+			args.append(" 1,1,1 0,0,0 ");
+			args.append("] ");
 		}
-		
+
 		return args.toString();
 	}
 
