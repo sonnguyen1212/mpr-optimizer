@@ -25,6 +25,10 @@ public class MprFile {
 	public String getPartCode() {
 		return partCode;
 	}
+	
+	public void setPartCode(String newCode){
+		this.partCode = newCode;
+	}
 
 	public String getDescription() {
 		return description;

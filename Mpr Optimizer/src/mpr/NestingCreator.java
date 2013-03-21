@@ -15,7 +15,7 @@ import xml.XMLParser;
 import mpr.Parameter;
 
 public class NestingCreator {
-	
+
 	//maybe ? could be a problem in mprLine
 	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\-\\+\\(\\)\\w]+)\"?");
 	public static Pattern lineStructForParam = Pattern.compile("(\\w+=\"?)(\\w+)(\"?)");
@@ -25,11 +25,13 @@ public class NestingCreator {
 	public static final String partDimens = "<100 \\\\WerkStck\\\\";
 	public static final String[] supportedOps = {"<102 \\\\BohrVert\\\\","<109 \\\\Nuten\\\\","<112 \\\\Tasche\\\\"};
 	public static final String vertTrimmingHeader ="<105 \\\\Konturfraesen\\\\";
+	public static final String componentHeader ="<139 \\\\Komponente\\\\";
 	public static final String horizBoring = "<103 \\\\BohrHoriz\\\\";
 	public static final String contourRegex = "](\\d+)";
 	public static final String contourElementRegex = "\\$E\\d+";
 	public static final String millingOperationRegex = "(\\w+=\")(\\d+)(:\\d+\")";
 	public static final String parameterHeader = "\\[001";
+
 
 	public static final String fileEnd = "!";
 	public static String PART_THICK = "DI";
@@ -43,6 +45,8 @@ public class NestingCreator {
 	private JProgressBar progressBar;
 	private int mprCount;
 	private boolean checkParameters, sawingSeperate;
+	private boolean checkComponents=true;
+	private String mprMergePath="c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\mprmerge.exe ", mprMergeArgs=" -v -ko ", componentsDir = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1\\\\ml4\\\\",a1path = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1"; 
 
 	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar, boolean param, boolean sawing){
 		this.parser = new XMLParser(xmlFile);
@@ -161,6 +165,37 @@ public class NestingCreator {
 				//break operations to arraylist for each operation
 				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations); 
 
+				//analyze and treat components
+				if (checkComponents)
+				{
+					ArrayList<ArrayList<String>> components = extractSpecificOpType(operationsBreaked, componentHeader);
+					//check if there are componenets and if it's not an already merged file
+					if (!mprFile.getAbsolutePath().endsWith("_merged.mpr") && components.size()>0)
+					{
+						String commandLine = analyzeComponents(components);
+						String newFileName = mprFile.getAbsolutePath();
+						int index = newFileName.lastIndexOf('.');
+						newFileName = newFileName.substring(0,index) + "_merged.mpr";
+						File newFile = new File(newFileName);
+						StringBuilder finalCommand = new StringBuilder();
+						finalCommand.append(mprMergePath);
+						finalCommand.append("-a="+newFile.getAbsolutePath());
+						finalCommand.append("-m="+mprFile.getAbsolutePath());
+						finalCommand.append(mprMergeArgs);
+						finalCommand.append("-p=" + a1path);
+						finalCommand.append(mprFile.getAbsolutePath());
+						finalCommand.append(commandLine);
+						finalCommand.append(" [ " + mprFile.getAbsolutePath() + "0,0,0 1,1,1 0,0,0 ] ");
+						System.out.println(finalCommand.toString());
+						Process tr = Runtime.getRuntime().exec(finalCommand.toString());
+						
+						MprFile newMpr = currentMpr;
+						newMpr.setPartCode(newFile.getName());
+						mprs.add(newMpr);
+						continue;
+					}
+				}
+
 				//if there are contours in the file, break the contours to seperate contours and extract the vertTrimming
 				if (!contours.isEmpty())
 				{
@@ -239,7 +274,7 @@ public class NestingCreator {
 						mprParser.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
 
 				}
-				
+
 				//check if should replace parameters
 				if (currentMprParameters!= null && currentMprParameters.size()>0)
 				{
@@ -528,6 +563,40 @@ public class NestingCreator {
 		}
 	}
 
+	private String analyzeComponents(ArrayList<ArrayList<String>> componenets)
+	{
+		String x,y,z,name;
+		StringBuilder args = new StringBuilder();
+		for (ArrayList<String> component: componenets)
+		{
+			x=""; y=""; z=""; name="";
+			args.append("[ ");
+			for (String line: component)
+			{
+				Matcher mprMatcher = mprLine.matcher(line);
+				if (mprMatcher.find()) {
+					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
+						x = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
 
+					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YA")) {
+						y = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+
+					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("ZA")) {
+						z = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+
+					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("IN")) {
+						name = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+					}
+				}
+				args.append(componentsDir);
+				args.append(name + " ");
+				args.append(x + "," + y + "," +z);
+				args.append(" 1,1,1 0,0,0 ");
+				args.append("]");
+			}
+		}
+		
+		return args.toString();
+	}
 
 }
