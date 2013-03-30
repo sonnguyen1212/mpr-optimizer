@@ -85,7 +85,7 @@ public class NestingGUI {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
 					// window.remoteVerifyLicense();
-					//window.localVerifyLicense();
+					window.localVerifyLicense();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -311,12 +311,12 @@ public class NestingGUI {
 				ArrayList<String> errorMessages = new ArrayList<>();
 				
 				OptionsManager options=null;
-				try {
-					options = new OptionsManager();
-				} catch (IOException e2) {
-					JOptionPane.showMessageDialog(frame,
-							"Problem Reading Configurations File");
-				}
+//				try {
+//					options = new OptionsManager();
+//				} catch (IOException e2) {
+//					JOptionPane.showMessageDialog(frame,
+//							"Problem Reading Configurations File");
+//				}
 				
 				NestingCreator nestingCreator = new NestingCreator(xmlFilePath
 						.getText(), mprPath.getText(), errorMessages,
@@ -328,7 +328,7 @@ public class NestingGUI {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(frame,
 							"Unknown error occured, please contact support");
-					// write error log!!!!!!!!!
+					// write error log!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				}
 				if (errorMessages.size() == 0) {
 					txtrStatusBar.setText("All Files Created Succesfully.");

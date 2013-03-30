@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 public class Parameter {
 	private String name, value, regex;
 	//public static final String parameterRegexStart ="(^|[+-*/\\s])(\\w)([+-*/\\s]|$)";
-	public static final String parameterRegexStart ="(^|[\\+\\-\\*\\/\\s])";
-	public static final String parameterRegexEnd ="([\\+\\-\\*\\/\\s]|$)";
+	public static final String parameterRegexStart ="(^|[\\(\\+\\-\\*\\/\\s])";
+	public static final String parameterRegexEnd ="([\\)\\+\\-\\*\\/\\s]|$)";
 
 	public Parameter(String name, String value){
 		this.name = name;
@@ -34,6 +34,5 @@ public class Parameter {
 	        }
 	        m.appendTail(sb);
 	        return sb.toString();
-
 	}
 }

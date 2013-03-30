@@ -2,10 +2,8 @@ package mpr;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,8 +17,8 @@ import xml.XMLParser;
 public class NestingCreator {
 
 	//maybe ? could be a problem in mprLine
-	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\-\\+\\(\\)\\w]+)\"?");
-	public static Pattern lineStructForParam = Pattern.compile("(\\w+=\"?)(\\w+)(\"?)");
+	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\*\\/\\s\\-\\+\\(\\)\\w]+)\"?");
+	public static Pattern lineStructForParam = Pattern.compile("(\\w+=\"?)([^\"]+)([\"\\s]?)");
 
 	public static final int PARAMETER_NAME = 1;
 	public static final int PARAMETER_VALUE = 2;
@@ -47,9 +45,8 @@ public class NestingCreator {
 	private JProgressBar progressBar;
 	private int mprCount;
 	private boolean checkParameters, sawingSeperate,checkComponents;
-	private OptionsManager options;
-	//private String mprMergePath="c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\mprmerge.exe ", mprMergeArgs=" -v -ko ", componentsDir = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1\\\\ml4\\\\",a1path = "c:\\\\Program Files (x86)\\\\Homag Group\\\\woodWOP6\\\\WW4\\\\a1"; 
-	private String mprMergePath="", mprMergeArgs="", componentsDir = "",a1path = ""; 
+	//	private OptionsManager options;
+	//	private String mprMergePath="", mprMergeArgs="", componentsDir = "",a1path = ""; 
 
 	public NestingCreator(String xmlFile, String mprDirectory, ArrayList<String> errorMsg, JProgressBar bar, boolean param, boolean sawing, OptionsManager options){
 		this.parser = new XMLParser(xmlFile);
@@ -60,16 +57,16 @@ public class NestingCreator {
 		this.mprDirectory = mprDirectory;
 		this.checkParameters = param;
 		this.sawingSeperate = sawing;
-		this.options = options;
+		//		this.options = options;
 
 		this.checkComponents= param; 
-		if (checkComponents)
-		{
-			mprMergePath = this.options.getProperty("mprMergePath");
-			mprMergeArgs = this.options.getProperty("mprMergeArgs");
-			componentsDir = this.options.getProperty("componentsDir");
-			a1path = this.options.getProperty("a1path");
-		}
+		//		if (checkComponents)
+		//		{
+		//			mprMergePath = this.options.getProperty("mprMergePath");
+		//			mprMergeArgs = this.options.getProperty("mprMergeArgs");
+		//			componentsDir = this.options.getProperty("componentsDir");
+		//			a1path = this.options.getProperty("a1path");
+		//		}
 	}
 
 	public void createLayoutMprs () throws IOException{
@@ -79,26 +76,27 @@ public class NestingCreator {
 				continue;
 
 			int currentContourIndex = 0;
+			int currentCSIndex = 4;
+
 			ArrayList<MprFile> mprs = currentLayout.getMprFiles();
 			ArrayList<String> currentPlateContours = new ArrayList<String>();
 			ArrayList<String> currentPlateOperations = new ArrayList<String>();
 			ArrayList<String> currentPlateMillings = new ArrayList<String>();
 
-			Point3D plateMeasurements = null;
-			try {
-				plateMeasurements = determinePlateMeasurements(currentLayout, mprs.get(0));
-				if (plateMeasurements==null)
-				{
-					errorMsg.add("File " + currentLayout.getMprFiles().get(0).getPartCode() + " was not found in the current directory");
-					errorMsg.add("Plate " + currentLayout.getNumber() + " Couldn't be created");
-					//look for other mpr to take measurements!!!!!!
-					continue;
+			ArrayList<String> currentPlateExtraCS = new ArrayList<String>();
+			currentPlateExtraCS.add("[K");
 
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			Point3D plateMeasurements = null;
+			plateMeasurements = determinePlateMeasurements(currentLayout, mprs.get(0));
+			if (plateMeasurements==null)
+			{
+				errorMsg.add("File " + currentLayout.getMprFiles().get(0).getPartCode() + " was not found in the current directory");
+				errorMsg.add("Plate " + currentLayout.getNumber() + " Couldn't be created");
+				//look for other mpr to take measurements!!!!!!
+				continue;
+
 			}
+
 			for (int mprIndex=0; mprIndex<mprs.size() ; mprIndex++){
 				MprFile currentMpr = mprs.get(mprIndex);
 				//for (MprFile currentMpr:mprs)
@@ -115,12 +113,9 @@ public class NestingCreator {
 				double xOffset = currentMpr.getXOffset();
 				double yOffset = currentMpr.getYOffset();
 				BufferedReader reader = null;;
-				try {
-					reader = new BufferedReader(new FileReader(mprFile));
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
+				reader = new BufferedReader(new FileReader(mprFile));
+
 				ArrayList<String> header = new ArrayList<String>();
 				ArrayList<String> contours = new ArrayList<>();
 				ArrayList<String> operations = new ArrayList<>();
@@ -180,44 +175,83 @@ public class NestingCreator {
 				//break operations to arraylist for each operation
 				ArrayList<ArrayList<String>> operationsBreaked = breakToOperations(operations); 
 
-				//analyze and treat components
+				//analyze and treat components - only if should FLIP!!!
 				if (checkComponents)
 				{
 					ArrayList<ArrayList<String>> components = extractSpecificOpType(operationsBreaked, componentHeader);
-					//check if there are componenets and if it's not an already merged file
-					if (!mprFile.getAbsolutePath().endsWith("_merged.mpr") && components!=null)
+					if (components!=null)
 					{
-						String commandLine = analyzeComponents(components);
-						String newFileName = mprFile.getAbsolutePath();
-						int index = newFileName.lastIndexOf('.');
-						newFileName = newFileName.substring(0,index) + "_merged.mpr";
-						File newFile = new File(newFileName);
-						StringBuilder finalCommand = new StringBuilder();
-						finalCommand.append(mprMergePath);
-						finalCommand.append("-a="+newFile.getAbsolutePath());
-						finalCommand.append(" -m="+mprFile.getAbsolutePath());
-						finalCommand.append(mprMergeArgs);
-						finalCommand.append("-p=" + a1path);
-						finalCommand.append(" -e=c:\\\\test\\\\log.log ");
-						//finalCommand.append(mprFile.getAbsolutePath());
-						finalCommand.append(" [ " + mprFile.getAbsolutePath() + " 0,0,0 1,1,1 0,0,0 ] ");
-						finalCommand.append(commandLine);
-						System.out.println(finalCommand.toString());
-						//Runtime.getRuntime().exec(finalCommand.toString());
+						if (shouldFlip)
+						{
+							//create CS for this part's components
+							double xOff = currentMpr.getLength() + xOffset;
+							currentPlateExtraCS.addAll(createCS(currentCSIndex, xOff, yOffset, 90.0));
 
-						Process p = Runtime.getRuntime().exec(finalCommand.toString());
-						MprFile newMpr = currentMpr;
-						newMpr.setPartCode(newFile.getName());
-						mprs.add(newMpr);
-						continue;
+							//change operations CS and add to the nesting Plate
+							for (ArrayList<String> currentComp:components)
+							{
+								mprParser.changeOpCS(currentComp, currentCSIndex);
+								//replace PARAM 
+								if (currentMprParameters!= null && currentMprParameters.size()>0)
+									replaceParamForComponents(components, currentMprParameters);
+								currentPlateOperations.addAll(currentComp);
+							}
+							//advance index
+							currentCSIndex++;
+						}
+						if (!shouldFlip)
+						{
+							//only replace param and put in plate
+							for (ArrayList<String> currentComp:components)
+							{
+								if (currentMprParameters!= null && currentMprParameters.size()>0)
+									replaceParamForComponents(components, currentMprParameters);
+								mprParser.addOffsetToOperation(currentComp, Double.toString(xOffset), Double.toString(yOffset));
+								currentPlateOperations.addAll(currentComp);
+							}
+						}
+
 					}
+
 				}
+				//check if there are componenets and if it's not an already merged file
+				//					if (!mprFile.getAbsolutePath().endsWith("_merged.mpr") && components!=null)
+				//					{
+				//						String commandLine = analyzeComponents(components);
+				//						String newFileName = mprFile.getAbsolutePath();
+				//						int index = newFileName.lastIndexOf('.');
+				//						newFileName = newFileName.substring(0,index) + "_merged.mpr";
+				//						File newFile = new File(newFileName);
+				//						StringBuilder finalCommand = new StringBuilder();
+				//						finalCommand.append(mprMergePath);
+				//						finalCommand.append("-a="+newFile.getAbsolutePath());
+				//						finalCommand.append(" -m="+mprFile.getAbsolutePath());
+				//						finalCommand.append(mprMergeArgs);
+				//						finalCommand.append("-p=" + a1path);
+				//						finalCommand.append(" -e=c:\\test\\log.log ");
+				//						//finalCommand.append(mprFile.getAbsolutePath());
+				//						finalCommand.append(" [ " + mprFile.getAbsolutePath() + " 0,0,0 1,1,1 0,0,0 ] ");
+				//						finalCommand.append(commandLine);
+				//						System.out.println(finalCommand.toString());
+				//						//Runtime.getRuntime().exec(finalCommand.toString());
+				//
+				//						Process p = Runtime.getRuntime().exec(finalCommand.toString());
+				//						MprFile newMpr = currentMpr;
+				//						newMpr.setPartCode(newFile.getName());
+				//						mprs.add(newMpr);
+				//						continue;
+				//					}
+
+
+
 
 				//if there are contours in the file, break the contours to seperate contours and extract the vertTrimming
 				if (!contours.isEmpty())
 				{
 					ArrayList<ArrayList<String>> contoursBreaked = breakContours(contours, contourRegex);
 					ArrayList<ArrayList<String>> vertMilling = extractSpecificOpType(operationsBreaked, vertTrimmingHeader);
+					if (vertMilling == null)
+						vertMilling = new ArrayList<ArrayList<String>>();
 					if (contoursBreaked.size() != vertMilling.size())
 						errorMsg.add("ERROR!!! Contouring and milling not the same size at file :" + currentMpr.getPartCode());
 
@@ -308,6 +342,7 @@ public class NestingCreator {
 
 			//createPlateFile:
 			ArrayList<String> allPlateLines = new ArrayList<>();
+			allPlateLines.addAll(currentPlateExtraCS);
 			allPlateLines.addAll(currentPlateContours);
 			allPlateLines.addAll(currentPlateMillings);
 			allPlateLines.addAll(currentPlateOperations);
@@ -563,7 +598,12 @@ public class NestingCreator {
 			if (matcher.matches())
 			{
 				temp = matcher.group(1) + replaceParamByValue(matcher.group(2), paramList)+matcher.group(3);
+				System.out.println(matcher.group(1));
+				System.out.println(matcher.group(2));
+				System.out.println(matcher.group(3));
+
 				lines.set(i, temp);
+
 			}
 		}
 	}
@@ -580,40 +620,93 @@ public class NestingCreator {
 		}
 	}
 
-	private String analyzeComponents(ArrayList<ArrayList<String>> componenets)
+	private void replaceParamForComponents (ArrayList<ArrayList<String>> components,  ArrayList<Parameter> paramList)
 	{
-		String x,y,z,name;
-		StringBuilder args = new StringBuilder();
-		for (ArrayList<String> component: componenets)
+		if (components==null)
+			return;
+		int componentsIndexes=0;
+		for (ArrayList<String> currentComp:components)
 		{
-			x=""; y=""; z=""; name="";
-			args.append("[ ");
-			for (String line: component)
-			{
-				Matcher mprMatcher = mprLine.matcher(line);
-				if (mprMatcher.find()) {
-					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
-						x = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+			int currIndex=0;
+			for(String line : currentComp) {
 
-					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YA")) {
-						y = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+				//matcher = lineStructForParam.matcher(lines.get(i));
+				//				if (matcher.matches())
+				//				{
+				//					temp = matcher.group(1) + replaceParamByValue(matcher.group(2), paramList)+matcher.group(3);
 
-					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("ZA")) {
-						z = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
-
-					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("IN")) {
-						name = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+				Matcher mprMatcher = lineStructForParam.matcher(line);
+				if (mprMatcher.matches()) {
+					if (!mprMatcher.group(1).matches("VA=\"")) 
+					{
+						//						line = mprMatcher.group(NestingCreator.PARAMETER_NAME) + "=\"" + replaceParamByValue(mprMatcher.group(NestingCreator.PARAMETER_VALUE), paramList) + "\"";
+						line = mprMatcher.group(1) + replaceParamByValue(mprMatcher.group(2), paramList)+mprMatcher.group(3);
+						components.get(componentsIndexes).set(currIndex, line);
+					} else {
+						String value = mprMatcher.group(2);
+						int firstSpace = value.indexOf(" ");
+						String paramName = value.substring(0,firstSpace);
+						String paramValue = replaceParamByValue(value.substring(firstSpace), paramList);
+						line = mprMatcher.group(1) + paramName + paramValue+ mprMatcher.group(3);
+						components.get(componentsIndexes).set(currIndex, line);
 					}
 				}
+				currIndex++;
 			}
-			args.append(componentsDir);
-			args.append(name + " ");
-			args.append(x + "," + y + "," +z);
-			args.append(" 1,1,1 0,0,0 ");
-			args.append("] ");
+			componentsIndexes++;
 		}
-
-		return args.toString();
 	}
+	//	private String analyzeComponents(ArrayList<ArrayList<String>> componenets)
+	//	{
+	//		String x,y,z,name;
+	//		StringBuilder args = new StringBuilder();
+	//		for (ArrayList<String> component: componenets)
+	//		{
+	//			x=""; y=""; z=""; name="";
+	//			args.append("[ ");
+	//			for (String line: component)
+	//			{
+	//				Matcher mprMatcher = mprLine.matcher(line);
+	//				if (mprMatcher.find()) {
+	//					if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
+	//						x = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+	//
+	//					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("YA")) {
+	//						y = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+	//
+	//					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("ZA")) {
+	//						z = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+	//
+	//					} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("IN")) {
+	//						name = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
+	//					}
+	//				}
+	//			}
+	//			args.append(componentsDir);
+	//			args.append(name + " ");
+	//			args.append(x + "," + y + "," +z);
+	//			args.append(" 1,1,1 0,0,0 ");
+	//			args.append("] ");
+	//		}
+	//
+	//		return args.toString();
+	//	}
+	private ArrayList<String> createCS(int index, double xOff, double yOff, double angle)
+	{
+		ArrayList<String> csData = new ArrayList<>();
+		csData.add("<00 \\\\Koordinatensystem\\\\");
+		csData.add("NR=\""+index+"\"");
+		csData.add("XP=\""+xOff+"\"");
+		csData.add("XF=\"1.0\"");
+		csData.add("YP=\""+yOff+"\"");
+		csData.add("YF=\"1.0\"");
+		csData.add("ZP=\"0\"");
+		csData.add("ZF=\"1.0\"");
+		csData.add("D1=\""+angle+"\"");
+		csData.add("KI=\"0\"");
+		csData.add("D2=\"0\"");
+		csData.add("MI=\"0\"");
 
+		return csData;
+	}
 }

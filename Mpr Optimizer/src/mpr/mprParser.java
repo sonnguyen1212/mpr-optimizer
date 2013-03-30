@@ -9,8 +9,8 @@ import xml.MprFile;
 public class mprParser {
 
 	//maybe ? could be a problem in mprLine
-	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\-\\+\\(\\)\\w]+)\"?");
-	public static Pattern contourLine = Pattern.compile("(\\w)=([.\\+\\-\\(\\)\\w]+)");
+	public static Pattern mprLine = Pattern.compile("(\\w+)=\"?([.\\*\\/\\s\\-\\+\\(\\)\\w]+)\"?");
+	public static Pattern contourLine = Pattern.compile("(\\w)=([.\\*\\/\\s\\+\\-\\(\\)\\w]+)");
 
 	public static final String xContour = "X";
 	public static final String yContour = "Y";
@@ -81,7 +81,9 @@ public class mprParser {
 		String oldXA = "", oldYA = "", oldXE = "", oldYE = "",oldLength = "", oldWidth = "";
 		for (String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
-			if (mprMatcher.find()) {
+//			if (mprMatcher.find()) {
+			if (mprMatcher.matches()) {
+
 				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
 					oldXA = mprMatcher.group(NestingCreator.PARAMETER_VALUE);
 					
@@ -105,8 +107,9 @@ public class mprParser {
 		int index=0;
 		for(String line : lines) {
 			Matcher mprMatcher = mprLine.matcher(line);
-			if (mprMatcher.find()) {
-				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {
+//			if (mprMatcher.find()) {
+			if (mprMatcher.matches()) {
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XA")) {					
 					line = "XA=\"" + yLen + "-(" + oldYA + ")\"";
 				
 				} else if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("XE")) {
@@ -136,7 +139,9 @@ public class mprParser {
 		String oldX="", oldY="";
 		for (String line : lines) {
 			Matcher contourMatcher = contourLine.matcher(line);
-			if (contourMatcher.find()) {
+			if (contourMatcher.matches()) {
+
+//			if (contourMatcher.find()) {
 				if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
 					oldX = contourMatcher.group(NestingCreator.PARAMETER_VALUE);
 				} else if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(yContour)) {
@@ -147,7 +152,9 @@ public class mprParser {
 		int index=0;
 		for(String line : lines) {
 			Matcher contourMatcher = contourLine.matcher(line);
-			if (contourMatcher.find()) {
+//			if (contourMatcher.find()) {
+			if (contourMatcher.matches()) {
+
 				 if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(xContour)) {
 					line = "X=" + yLen + "-(" + oldY + ")";
 				} else if (contourMatcher.group(NestingCreator.PARAMETER_NAME).equals(yContour)) {
@@ -158,6 +165,29 @@ public class mprParser {
 			index++;
 		}
 		return;
+	}
+	
+	public static void changeOpCS(ArrayList<String> currentComp, int currentCSIndex)
+	{
+		int index=0;
+		boolean found = false;
+		String newLine = "KO=\"" + currentCSIndex + "\"";
+		for(String line : currentComp) {
+			Matcher mprMatcher = mprLine.matcher(line);
+			if (mprMatcher.find()) {
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("KO")) 
+				{
+					currentComp.set(index, newLine);
+					break;
+				} 
+			}
+			index++;
+		}
+		
+		if (!found)
+		{
+			currentComp.add(newLine);
+		}
 	}
 	
 	public static boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)
