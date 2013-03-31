@@ -6,8 +6,11 @@ import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -29,11 +32,15 @@ import java.awt.Rectangle;
 
 public class CSVMaker {
 
+	private static final String LOG_FILE = "\\log.txt";
+	private static File logFile = null;
 	private JFrame frmCsvMaker;
 	private ArrayList<File> mprFiles;
 	private JTextField textField;
 	private DefaultListModel<String> listModel;
 	private JList<String> list;
+	private File parentDir = null;
+	private File homeFolder;
 
 	/**
 	 * Launch the application.
@@ -45,6 +52,7 @@ public class CSVMaker {
 					CSVMaker window = new CSVMaker();
 					window.frmCsvMaker.setVisible(true);
 				} catch (Exception e) {
+					CSVMaker.writeException(e);
 					e.printStackTrace();
 				}
 			}
@@ -66,13 +74,30 @@ public class CSVMaker {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
+			writeException(e1);
 		} catch (InstantiationException e1) {
 			e1.printStackTrace();
+			writeException(e1);
 		} catch (IllegalAccessException e1) {
 			e1.printStackTrace();
+			writeException(e1);
 		} catch (UnsupportedLookAndFeelException e1) {
 			e1.printStackTrace();
+			writeException(e1);
 		}
+		String path = CSVMaker.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		String decodedPath = null;
+
+		try {
+			decodedPath = URLDecoder.decode(path, "UTF-8");
+			int lastOccurenceSlash = decodedPath.lastIndexOf("/");
+			decodedPath = decodedPath.substring(0, lastOccurenceSlash + 1);
+		} catch (UnsupportedEncodingException e2) {
+			e2.printStackTrace();
+			writeException(e2);
+		}
+		homeFolder = new File(decodedPath);
+		logFile = new File(homeFolder.getAbsolutePath() + LOG_FILE);
 		mprFiles = new ArrayList<>();
 		frmCsvMaker = new JFrame();
 		frmCsvMaker.setTitle("CSV Maker");
@@ -104,11 +129,17 @@ public class CSVMaker {
 		JButton btnBrowseCSV = new JButton("Browse");
 		btnBrowseCSV.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser fileChooser = new JFileChooser("C:\\Users\\La bla bla\\Dropbox");
+				JFileChooser fileChooser = null;
+				if(parentDir != null) {
+					fileChooser = new JFileChooser(parentDir);
+				} else {
+					fileChooser = new JFileChooser();
+				}
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				FileNameExtensionFilter mprExtensionFilter = new FileNameExtensionFilter("CSV File (*.csv)", "csv");
 				fileChooser.setFileFilter(mprExtensionFilter);
 				int result = fileChooser.showSaveDialog(frmCsvMaker);
+				parentDir = fileChooser.getCurrentDirectory();
 				if (result == JFileChooser.APPROVE_OPTION) {
 					if (fileChooser.getSelectedFile().getAbsolutePath().endsWith(".csv")) {
 						textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
@@ -138,13 +169,19 @@ public class CSVMaker {
 		JButton btnBrowseMPR = new JButton("Add");
 		btnBrowseMPR.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser fileChooser = new JFileChooser("C:\\Users\\La bla bla\\Dropbox");
+				JFileChooser fileChooser = null;
+				if (parentDir != null) {
+					fileChooser = new JFileChooser(parentDir);
+				} else {
+					fileChooser = new JFileChooser();
+				}
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				fileChooser.setMultiSelectionEnabled(true);
 				FileNameExtensionFilter mprExtensionFilter = new FileNameExtensionFilter("MPR File (*.mpr)", "mpr");
 				fileChooser.setFileFilter(mprExtensionFilter);
 				int result = fileChooser.showOpenDialog(frmCsvMaker);
 				if (result == JFileChooser.APPROVE_OPTION) {
+					parentDir = fileChooser.getCurrentDirectory();
 					File[] selectedFiles = fileChooser.getSelectedFiles();
 					if (selectedFiles[0].isDirectory()) {
 						getMprFiles(selectedFiles[0]);
@@ -214,6 +251,7 @@ public class CSVMaker {
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			writeException(e);
 		}
 	}
 
@@ -229,5 +267,26 @@ public class CSVMaker {
 
 			}
 		}
+	}
+
+	public static void writeException(Exception e) {
+		FileWriter fw = null;
+		try {
+
+			fw = new FileWriter(logFile, true);
+			PrintWriter pw = new PrintWriter(fw);
+			e.printStackTrace(pw);
+			if (pw != null) {
+				pw.close();
+			}
+			JOptionPane
+					.showMessageDialog(null,
+							"An error occured.\nLog has been saved to " + logFile.getAbsolutePath()
+									+ "\nPlease e-mail the file to us for maintance.", "Error!",
+							JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 }

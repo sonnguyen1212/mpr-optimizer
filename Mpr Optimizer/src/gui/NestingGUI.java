@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.HeadlessException;
@@ -11,15 +12,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -28,30 +34,26 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import mpr.NestingCreator;
 import mpr.OptionsManager;
-
 import serial.License;
 import serial.LocalVerifier;
 import serial.RemoteVerifier;
-import javax.swing.JProgressBar;
-import javax.swing.JPanel;
-import javax.swing.JCheckBox;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
 
 public class NestingGUI {
 
 	private static final String LICENSE_FILE = "\\License\\license.data";
-
+	private static final String LOG_FILE = "\\log.txt";
+	private static File logFile = null;
 	private JFrame frame;
 	private JMenuBar menuBar;
 	private JMenu mnFile;
@@ -88,6 +90,7 @@ public class NestingGUI {
 					window.localVerifyLicense();
 				} catch (Exception e) {
 					e.printStackTrace();
+					NestingGUI.writeException(e);
 				}
 			}
 		});
@@ -112,39 +115,33 @@ public class NestingGUI {
 
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						StringSelection clipBoard = new StringSelection(
-								macField.getText());
-						Toolkit.getDefaultToolkit().getSystemClipboard()
-								.setContents(clipBoard, null);
+						StringSelection clipBoard = new StringSelection(macField.getText());
+						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(clipBoard, null);
 					}
 				});
 				macField.setText(LocalVerifier.getCurrentMac());
 				macField.setEnabled(false);
 				final JTextField serialField = new JTextField();
-				final JComponent[] inputs = new JComponent[] {
-						new JLabel("Serial not found."),
-						new JLabel(
-								"Please send an e-mail with the following address:"),
-						macField, copyButton, new JLabel("Enter your serial:"),
-						serialField };
+				final JComponent[] inputs = new JComponent[] { new JLabel("Serial not found."),
+						new JLabel("Please send an e-mail with the following address:"), macField, copyButton,
+						new JLabel("Enter your serial:"), serialField };
 
-				JOptionPane.showMessageDialog(frame, inputs,
-						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(frame, inputs, "Serial Not Found", JOptionPane.WARNING_MESSAGE);
 				serial = serialField.getText();
 			} catch (HeadlessException e) {
 				e.printStackTrace();
+				writeException(e);
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
+				writeException(e);
 			}
 			localVerifier.createLicense(serial);
 			int verifierResult = localVerifier.verify();
 			if (verifierResult != LocalVerifier.LICENSE_MATCH) {
 				if (verifierResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
-					JOptionPane.showMessageDialog(null, "Keys don't match",
-							"Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
 				} else if (verifierResult == LocalVerifier.LICENSE_EXPIRED) {
-					JOptionPane.showMessageDialog(null, "License Expired",
-							"Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "License Expired", "Error!", JOptionPane.ERROR_MESSAGE);
 				}
 				System.exit(-1);
 			}
@@ -152,11 +149,9 @@ public class NestingGUI {
 			int verifierResult = localVerifier.verify();
 			if (verifierResult != LocalVerifier.LICENSE_MATCH) {
 				if (verifierResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
-					JOptionPane.showMessageDialog(null, "Keys don't match",
-							"Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
 				} else if (verifierResult == LocalVerifier.LICENSE_EXPIRED) {
-					JOptionPane.showMessageDialog(null, "License Expired",
-							"Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "License Expired", "Error!", JOptionPane.ERROR_MESSAGE);
 				}
 				System.exit(-1);
 			}
@@ -170,28 +165,23 @@ public class NestingGUI {
 			File license = new File(LICENSE_FILE);
 			String serial = "";
 			if (!license.exists()) {
-				serial = JOptionPane.showInputDialog(frame,
-						"Serial not found.\nPlease enter serial number:",
+				serial = JOptionPane.showInputDialog(frame, "Serial not found.\nPlease enter serial number:",
 						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
 				if (remoteVerifier.verify(serial) != 1) {
-					JOptionPane.showMessageDialog(null, "Keys don't match",
-							"Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
 				} else {
 					License serialObject = new License(serial);
-					ObjectOutputStream oos = new ObjectOutputStream(
-							new FileOutputStream(license));
+					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(license));
 					oos.writeObject(serialObject);
 					oos.close();
 				}
 			} else {
-				ObjectInputStream ois = new ObjectInputStream(
-						new FileInputStream(license));
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(license));
 				License serialObject = (License) ois.readObject();
 				ois.close();
 				if (remoteVerifier.verify(serialObject.getSerial()) != 1) {
-					JOptionPane.showMessageDialog(null, "Keys don't match",
-							"Error!", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
 				}
 
@@ -200,12 +190,16 @@ public class NestingGUI {
 		} catch (UnknownHostException e1) {
 			printErrorMessage("Couldn't resolve MAC Address");
 			e1.printStackTrace();
+			writeException(e1);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			writeException(e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			writeException(e);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			writeException(e);
 		}
 	}
 
@@ -232,16 +226,19 @@ public class NestingGUI {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e1) {
+			writeException(e1);
 			e1.printStackTrace();
 		} catch (InstantiationException e1) {
+			writeException(e1);
 			e1.printStackTrace();
 		} catch (IllegalAccessException e1) {
+			writeException(e1);
 			e1.printStackTrace();
 		} catch (UnsupportedLookAndFeelException e1) {
+			writeException(e1);
 			e1.printStackTrace();
 		}
-		String path = NestingGUI.class.getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
+		String path = NestingGUI.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		String decodedPath = null;
 
 		try {
@@ -250,8 +247,10 @@ public class NestingGUI {
 			decodedPath = decodedPath.substring(0, lastOccurenceSlash + 1);
 		} catch (UnsupportedEncodingException e2) {
 			e2.printStackTrace();
+			writeException(e2);
 		}
 		homeFolder = new File(decodedPath);
+		logFile = new File(homeFolder.getAbsolutePath() + LOG_FILE);
 		isMPRDestDirSelected = false;
 		isXMLFileSelected = false;
 		frame = new JFrame("Nesting MPR Generator");
@@ -297,8 +296,7 @@ public class NestingGUI {
 		frame.getContentPane().add(lblXmlFile);
 
 		lblWoodwopFilesDirectory = new JLabel("WoodWop Files:");
-		lblWoodwopFilesDirectory.setFont(new Font("Lucida Grande", Font.BOLD,
-				18));
+		lblWoodwopFilesDirectory.setFont(new Font("Lucida Grande", Font.BOLD, 18));
 		lblWoodwopFilesDirectory.setBounds(20, 89, 156, 29);
 		frame.getContentPane().add(lblWoodwopFilesDirectory);
 
@@ -307,41 +305,40 @@ public class NestingGUI {
 		btnGenerateNesting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				boolean checkParameter = chckbxParameters.isSelected();
-				boolean sawingSeperate = ((String)sawingCombo.getSelectedItem()).matches("Seperate Machining")?true:false;
+				boolean sawingSeperate = ((String) sawingCombo.getSelectedItem()).matches("Seperate Machining") ? true
+						: false;
 				ArrayList<String> errorMessages = new ArrayList<>();
-				
-				OptionsManager options=null;
-//				try {
-//					options = new OptionsManager();
-//				} catch (IOException e2) {
-//					JOptionPane.showMessageDialog(frame,
-//							"Problem Reading Configurations File");
-//				}
-				
-				NestingCreator nestingCreator = new NestingCreator(xmlFilePath
-						.getText(), mprPath.getText(), errorMessages,
-						progressBar, checkParameter, sawingSeperate, options);
+
+				OptionsManager options = null;
+				// try {
+				// options = new OptionsManager();
+				// } catch (IOException e2) {
+				// JOptionPane.showMessageDialog(frame,
+				// "Problem Reading Configurations File");
+				// }
+
+				NestingCreator nestingCreator = new NestingCreator(xmlFilePath.getText(), mprPath.getText(),
+						errorMessages, progressBar, checkParameter, sawingSeperate, options);
 				try {
 					txtrStatusBar.setText("Status: Processing..");
 					nestingCreator.createLayoutMprs();
 				} catch (Exception e1) {
 					e1.printStackTrace();
-					JOptionPane.showMessageDialog(frame,
-							"Unknown error occured, please contact support");
-					// write error log!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					JOptionPane.showMessageDialog(frame, "Unknown error occured, please contact support");
+					// write error
+					// log!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					writeException(e1);
 				}
 				if (errorMessages.size() == 0) {
 					txtrStatusBar.setText("All Files Created Succesfully.");
-					JOptionPane.showMessageDialog(frame,
-							"All Files Created Succesfully.");
+					JOptionPane.showMessageDialog(frame, "All Files Created Succesfully.");
 				} else {
 					String resultString = "";
 					for (String currentLine : errorMessages) {
 						resultString = resultString.concat(currentLine + "\n");
 					}
 					txtrStatusBar.setText(resultString);
-					JOptionPane.showMessageDialog(frame,
-							"Operation With Errors, Please Check Status Log");
+					JOptionPane.showMessageDialog(frame, "Operation With Errors, Please Check Status Log");
 				}
 
 			}
@@ -366,8 +363,7 @@ public class NestingGUI {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser(homeFolder);
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				FileNameExtensionFilter xmlExtensionFilter = new FileNameExtensionFilter(
-						"XML File (*.xml)", "xml");
+				FileNameExtensionFilter xmlExtensionFilter = new FileNameExtensionFilter("XML File (*.xml)", "xml");
 				fileChooser.setFileFilter(xmlExtensionFilter);
 				fileChooser.setDialogTitle("Choose your XML file:");
 				fileChooser.setBounds(6, 6, 550, 400);
@@ -424,32 +420,54 @@ public class NestingGUI {
 		progressBar.setStringPainted(true);
 		progressBar.setBounds(20, 196, 558, 20);
 		frame.getContentPane().add(progressBar);
-		
+
 		JPanel panel = new JPanel();
 		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		panel.setBounds(20, 447, 554, 109);
 		frame.getContentPane().add(panel);
 		panel.setLayout(null);
-		
+
 		JLabel lblOptions = new JLabel("Options:");
 		lblOptions.setFont(new Font("Tahoma", Font.BOLD, 16));
 		lblOptions.setBounds(10, 11, 76, 26);
 		panel.add(lblOptions);
-		
+
 		chckbxParameters = new JCheckBox("Check And Replace Parameters");
 		chckbxParameters.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		chckbxParameters.setBounds(6, 44, 222, 23);
 		panel.add(chckbxParameters);
-		
+
 		JLabel lblSawingOperationPosition = new JLabel("Sawing Operation Position:");
 		lblSawingOperationPosition.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblSawingOperationPosition.setBounds(10, 76, 183, 22);
 		panel.add(lblSawingOperationPosition);
-		
+
 		sawingCombo = new JComboBox<>();
 		sawingCombo.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		sawingCombo.setModel(new DefaultComboBoxModel<String>(new String[] {"Seperate Machining", "Nesting Machining"}));
+		sawingCombo.setModel(new DefaultComboBoxModel<String>(new String[] { "Seperate Machining",
+				"Nesting Machining" }));
 		sawingCombo.setBounds(188, 74, 183, 25);
 		panel.add(sawingCombo);
+	}
+
+	public static void writeException(Exception e) {
+		FileWriter fw = null;
+		try {
+
+			fw = new FileWriter(logFile, true);
+			PrintWriter pw = new PrintWriter(fw);
+			e.printStackTrace(pw);
+			if (pw != null) {
+				pw.close();
+			}
+			JOptionPane
+					.showMessageDialog(null,
+							"An error occured.\nLog has been saved to " + logFile.getAbsolutePath()
+									+ "\nPlease e-mail the file to us for maintance.", "Error!",
+							JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 }
