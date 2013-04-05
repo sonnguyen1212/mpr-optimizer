@@ -1,14 +1,11 @@
 package serial;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -17,18 +14,14 @@ import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
 import javax.swing.JOptionPane;
 
 public class LocalVerifier {
@@ -44,92 +37,6 @@ public class LocalVerifier {
 
 	public LocalVerifier(File homeFolder) {
 		this.homeFolder = homeFolder;
-	}
-
-	public void createLicense(String serial) {
-		createKey(serial);
-		SecretKey key = loadKey();
-		try {
-			License license = new License(serial);
-			ArrayList<String> macs = getAllAdresses();
-			for (String mac : macs) {
-				// TO REMOVE
-				String md5Full = md5(mac + "full");
-				String md5Limited = md5(mac + "limited");
-				if (md5Full.equals(serial)) {
-					license.setLimited(false);
-					break;
-				} else if (md5Limited.equals(serial)) {
-					license.setLimited(true);
-					break;
-				}
-			}
-			// Create Cipher
-			Cipher desCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-			desCipher.init(Cipher.ENCRYPT_MODE, key);
-
-			// Create stream
-			File licenseFolder = new File(homeFolder.getAbsolutePath()
-					+ LICENSE_FOLDER);
-			if (!licenseFolder.exists()) {
-				licenseFolder.mkdirs();
-			}
-			FileOutputStream fos = new FileOutputStream(
-					licenseFolder.getAbsolutePath() + LICENSE_FILE);
-			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			CipherOutputStream cos = new CipherOutputStream(bos, desCipher);
-			ObjectOutputStream oos = new ObjectOutputStream(cos);
-			oos.writeObject(license);
-			oos.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void createKey(String serial) {
-		if (serial == null) {
-			JOptionPane.showMessageDialog(null, "No Key Entered", "Error!",
-					JOptionPane.ERROR_MESSAGE);
-			System.exit(-1);
-		}
-		byte password[] = serial.getBytes();
-		DESKeySpec desKeySpec;
-		try {
-
-			desKeySpec = new DESKeySpec(password);
-			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-			SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
-			File licenseFolder = new File(homeFolder.getAbsolutePath()
-					+ LICENSE_FOLDER);
-			if (!licenseFolder.exists()) {
-				licenseFolder.mkdirs();
-			}
-			FileOutputStream fos = new FileOutputStream(
-					licenseFolder.getAbsolutePath() + KEY_FILE);
-			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(secretKey);
-			oos.close();
-		} catch (InvalidKeyException e) {
-			JOptionPane.showMessageDialog(null, "Keys don't match", "Error!",
-					JOptionPane.ERROR_MESSAGE);
-			System.exit(-1);
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public static String md5(String input) throws NoSuchAlgorithmException {
@@ -158,27 +65,16 @@ public class LocalVerifier {
 				}
 				ArrayList<String> macs = getAllAdresses();
 				for (String mac : macs) {
-					String md5Full = md5(mac + "full");
-					String md5Limited = md5(mac + "limited");
-					if (md5Full.equals(license.getSerial())) {
-						return LICENSE_MATCH;
-					} else if (md5Limited.equals(license.getSerial())) {
+					String md5 = md5(mac);
+					if(md5.equals(license.getSerial())) {
 						return LICENSE_MATCH;
 					}
-
 				}
-				// String mac = getCurrentMac();
-				// String md5key = md5(mac);
-				// if (md5key.equals(license.getSerial())) {
-				// return true;
-				// }
+
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			} catch (SocketException e) {
 				e.printStackTrace();
-				// } catch (UnknownHostException e) {
-				// e.printStackTrace();
-				// }
 			}
 		}
 		return LICENSE_KEYS_DONT_MATCH;

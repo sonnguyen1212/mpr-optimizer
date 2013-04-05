@@ -17,13 +17,14 @@ public class License implements Serializable {
 	private Date expireDate, createDate;
 	private boolean isLimited;
 	
-	public License(String serial) throws UnknownHostException {
+	public License(String serial, Date createDate) throws UnknownHostException {
 		this.serial = serial;
 		expireDate = new Date();
 		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(createDate);
 		calendar.add(Calendar.DATE, EXPIRATION_TIME);
 		expireDate = calendar.getTime();
-		createDate = new Date();
+		this.createDate = createDate;
 	}
 
 	public Date getExpirationDate()

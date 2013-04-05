@@ -3,7 +3,6 @@ package gui;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -11,11 +10,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -75,6 +72,7 @@ public class NestingGUI {
 	private boolean isXMLFileSelected;
 	private boolean isMPRDestDirSelected;
 	private JProgressBar progressBar;
+	private static OptionsManager options = null;
 	private static LocalVerifier localVerifier;
 
 	/**
@@ -86,8 +84,12 @@ public class NestingGUI {
 				try {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
-					 window.remoteVerifyLicense();
-//					window.localVerifyLicense();
+					boolean activated = (options.getProperty("activated") != null && options.getProperty("activated").equals("true")) ? true : false;
+					if (!activated) {
+						window.remoteVerifyLicense();
+					} else {
+						window.localVerifyLicense();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					NestingGUI.writeException(e);
@@ -104,47 +106,12 @@ public class NestingGUI {
 	}
 
 	private void localVerifyLicense() {
+		System.out.println("local");
 		localVerifier = new LocalVerifier(homeFolder);
 		File license = new File(homeFolder.getAbsolutePath() + LICENSE_FILE);
-		String serial = "";
 		if (!license.exists()) {
-			try {
-				final JTextField macField = new JTextField();
-				JButton copyButton = new JButton("Copy Address To Clipboard");
-				copyButton.addActionListener(new ActionListener() {
-
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						StringSelection clipBoard = new StringSelection(macField.getText());
-						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(clipBoard, null);
-					}
-				});
-				macField.setText(LocalVerifier.getCurrentMac());
-				macField.setEnabled(false);
-				final JTextField serialField = new JTextField();
-				final JComponent[] inputs = new JComponent[] { new JLabel("Serial not found."),
-						new JLabel("Please send an e-mail with the following address:"), macField, copyButton,
-						new JLabel("Enter your serial:"), serialField };
-
-				JOptionPane.showMessageDialog(frame, inputs, "Serial Not Found", JOptionPane.WARNING_MESSAGE);
-				serial = serialField.getText();
-			} catch (HeadlessException e) {
-				e.printStackTrace();
-				writeException(e);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-				writeException(e);
-			}
-			localVerifier.createLicense(serial);
-			int verifierResult = localVerifier.verify();
-			if (verifierResult != LocalVerifier.LICENSE_MATCH) {
-				if (verifierResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
-					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
-				} else if (verifierResult == LocalVerifier.LICENSE_EXPIRED) {
-					JOptionPane.showMessageDialog(null, "License Expired", "Error!", JOptionPane.ERROR_MESSAGE);
-				}
-				System.exit(-1);
-			}
+			remoteVerifyLicense();
+			return;
 		} else {
 			int verifierResult = localVerifier.verify();
 			if (verifierResult != LocalVerifier.LICENSE_MATCH) {
@@ -161,8 +128,10 @@ public class NestingGUI {
 	@SuppressWarnings("unused")
 	private void remoteVerifyLicense() {
 		try {
-			RemoteVerifier remoteVerifier = new RemoteVerifier();
+			System.out.println("remote");
+			RemoteVerifier remoteVerifier = new RemoteVerifier(homeFolder);
 			File license = new File(LICENSE_FILE);
+
 			String serial = "";
 			if (!license.exists()) {
 				final JTextField macField = new JTextField();
@@ -182,25 +151,40 @@ public class NestingGUI {
 						new JLabel("Please send an e-mail with the following address:"), macField, copyButton,
 						new JLabel("Enter your serial:"), serialField };
 
-//				JOptionPane.showMessageDialog(frame, inputs, "Serial Not Found", JOptionPane.WARNING_MESSAGE);
-//				serial = serialField.getText();
-				serial = "43fda441af4b201a16f14783943b18db";
-				if (remoteVerifier.verify(serial) != 1) {
-					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+				// JOptionPane.showMessageDialog(frame, inputs,
+				// "Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				// serial = serialField.getText();
+				serial = "14c899525bf138db84f8e8a11d0af557";
+				int verificationResult = remoteVerifier.verify(serial);
+				if (verificationResult != LocalVerifier.LICENSE_MATCH) {
+					if (verificationResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
+						JOptionPane.showMessageDialog(null, "Keys don't match", "Error!",
+								JOptionPane.ERROR_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(null, "License expired!", "Error!",
+								JOptionPane.ERROR_MESSAGE);
+					}
 					System.exit(-1);
 				} else {
-					License serialObject = new License(serial);
-					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(license));
-					oos.writeObject(serialObject);
-					oos.close();
+					remoteVerifier.createLicense(serial);
+					options.writeProperty("activated", "true");
 				}
 			} else {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(license));
 				License serialObject = (License) ois.readObject();
 				ois.close();
-				if (remoteVerifier.verify(serialObject.getSerial()) != 1) {
-					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
+				int verificationResult = remoteVerifier.verify(serialObject.getSerial());
+				if (verificationResult != LocalVerifier.LICENSE_MATCH) {
+					if (verificationResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
+						JOptionPane.showMessageDialog(null, "Keys don't match", "Error!",
+								JOptionPane.ERROR_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(null, "License expired!", "Error!",
+								JOptionPane.ERROR_MESSAGE);
+					}
 					System.exit(-1);
+				} else {
+					options.writeProperty("activated", "true");
 				}
 
 			}
@@ -317,7 +301,11 @@ public class NestingGUI {
 		lblWoodwopFilesDirectory.setFont(new Font("Lucida Grande", Font.BOLD, 18));
 		lblWoodwopFilesDirectory.setBounds(20, 89, 156, 29);
 		frame.getContentPane().add(lblWoodwopFilesDirectory);
-
+		try {
+			options = new OptionsManager(homeFolder);
+		} catch (IOException e2) {
+			JOptionPane.showMessageDialog(frame, "Problem Reading Configurations File");
+		}
 		btnGenerateNesting = new JButton("Generate Nesting!");
 		btnGenerateNesting.setEnabled(false);
 		btnGenerateNesting.addActionListener(new ActionListener() {
@@ -326,14 +314,6 @@ public class NestingGUI {
 				boolean sawingSeperate = ((String) sawingCombo.getSelectedItem()).matches("Seperate Machining") ? true
 						: false;
 				ArrayList<String> errorMessages = new ArrayList<>();
-
-				OptionsManager options = null;
-				// try {
-				// options = new OptionsManager();
-				// } catch (IOException e2) {
-				// JOptionPane.showMessageDialog(frame,
-				// "Problem Reading Configurations File");
-				// }
 
 				NestingCreator nestingCreator = new NestingCreator(xmlFilePath.getText(), mprPath.getText(),
 						errorMessages, progressBar, checkParameter, sawingSeperate, options);
