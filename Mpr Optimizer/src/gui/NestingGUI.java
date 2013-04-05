@@ -106,7 +106,6 @@ public class NestingGUI {
 	}
 
 	private void localVerifyLicense() {
-		System.out.println("local");
 		localVerifier = new LocalVerifier(homeFolder);
 		File license = new File(homeFolder.getAbsolutePath() + LICENSE_FILE);
 		if (!license.exists()) {
@@ -125,10 +124,8 @@ public class NestingGUI {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private void remoteVerifyLicense() {
 		try {
-			System.out.println("remote");
 			RemoteVerifier remoteVerifier = new RemoteVerifier(homeFolder);
 			File license = new File(LICENSE_FILE);
 
@@ -151,10 +148,9 @@ public class NestingGUI {
 						new JLabel("Please send an e-mail with the following address:"), macField, copyButton,
 						new JLabel("Enter your serial:"), serialField };
 
-				// JOptionPane.showMessageDialog(frame, inputs,
-				// "Serial Not Found", JOptionPane.WARNING_MESSAGE);
-				// serial = serialField.getText();
-				serial = "14c899525bf138db84f8e8a11d0af557";
+				 JOptionPane.showMessageDialog(frame, inputs,
+				 "Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				 serial = serialField.getText();
 				int verificationResult = remoteVerifier.verify(serial);
 				if (verificationResult != LocalVerifier.LICENSE_MATCH) {
 					if (verificationResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
