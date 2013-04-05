@@ -10,20 +10,26 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class RemoteVerifier {
 
 	private static final String URL_ADDRESS = "http://www.parkme.co.il/licenseOptimizer.php";
+	private static final String TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 	private String mac;
 
 	public RemoteVerifier() throws UnknownHostException {
 		this.mac = LocalVerifier.getCurrentMac();
-//		this.mac = "1";
+		// this.mac = "1";
 	}
 
 	/**
 	 * Verifies that the MAC of this machine and the serial matches.
-	 * @param serial the serial to check
+	 * 
+	 * @param serial
+	 *            the serial to check
 	 * @return 1 if match. 0 if not, -1 if couldn't check
 	 */
 	public int verify(String serial) {
@@ -31,7 +37,6 @@ public class RemoteVerifier {
 		int result = -1;
 		try {
 			if (serial != null) {
-				System.out.println("MAC: " + mac + " Serial: (" + serial + ")");
 				data = URLEncoder.encode("mac", "UTF-8") + "=" + URLEncoder.encode(mac, "UTF-8");
 				data += "&" + URLEncoder.encode("serial", "UTF-8") + "=" + URLEncoder.encode(serial, "UTF-8");
 				data += "&" + URLEncoder.encode("mode", "UTF-8") + "=" + URLEncoder.encode("VERIFY", "UTF-8");
@@ -42,19 +47,21 @@ public class RemoteVerifier {
 				wr.write(data);
 				wr.flush();
 				BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				String line;
-				while ((line = rd.readLine()) != null) {
-					result = Integer.parseInt(line);
+				String resultIntString = rd.readLine();
+				if (Integer.parseInt(resultIntString) == 1) {
+					String resultDateString = rd.readLine();
+					SimpleDateFormat formatter = new SimpleDateFormat(TIME_PATTERN);
+					Date dateOfActivation = formatter.parse(resultDateString);
+					Date today = new Date();
 				}
 			}
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		return result;

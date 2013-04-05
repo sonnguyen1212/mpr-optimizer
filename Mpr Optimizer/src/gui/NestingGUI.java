@@ -86,8 +86,8 @@ public class NestingGUI {
 				try {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
-					// window.remoteVerifyLicense();
-					window.localVerifyLicense();
+					 window.remoteVerifyLicense();
+//					window.localVerifyLicense();
 				} catch (Exception e) {
 					e.printStackTrace();
 					NestingGUI.writeException(e);
@@ -165,8 +165,26 @@ public class NestingGUI {
 			File license = new File(LICENSE_FILE);
 			String serial = "";
 			if (!license.exists()) {
-				serial = JOptionPane.showInputDialog(frame, "Serial not found.\nPlease enter serial number:",
-						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				final JTextField macField = new JTextField();
+				JButton copyButton = new JButton("Copy Address To Clipboard");
+				copyButton.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						StringSelection clipBoard = new StringSelection(macField.getText());
+						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(clipBoard, null);
+					}
+				});
+				macField.setText(LocalVerifier.getCurrentMac());
+				macField.setEnabled(false);
+				final JTextField serialField = new JTextField();
+				final JComponent[] inputs = new JComponent[] { new JLabel("Serial not found."),
+						new JLabel("Please send an e-mail with the following address:"), macField, copyButton,
+						new JLabel("Enter your serial:"), serialField };
+
+//				JOptionPane.showMessageDialog(frame, inputs, "Serial Not Found", JOptionPane.WARNING_MESSAGE);
+//				serial = serialField.getText();
+				serial = "43fda441af4b201a16f14783943b18db";
 				if (remoteVerifier.verify(serial) != 1) {
 					JOptionPane.showMessageDialog(null, "Keys don't match", "Error!", JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
