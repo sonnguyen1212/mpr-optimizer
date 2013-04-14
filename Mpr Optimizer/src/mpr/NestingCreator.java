@@ -305,7 +305,7 @@ public class NestingCreator {
 					uniteArrayLists(unSupportedOps, header);
 					header.add(fileEnd);
 					String fileName = currentMpr.getPartCode();
-					mprWriter.createLeftOverMpr(header, mprDirectory, fileName); 
+					mprWriter.createLeftOverMpr(header, mprDirectory, "LO_"+fileName); 
 				}
 
 				//create second side if needed
