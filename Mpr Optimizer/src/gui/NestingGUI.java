@@ -41,6 +41,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import mpr.NestingCreator;
+import mpr.NewNestingCreator;
 import mpr.OptionsManager;
 import serial.License;
 import serial.LocalVerifier;
@@ -311,7 +312,7 @@ public class NestingGUI {
 						: false;
 				ArrayList<String> errorMessages = new ArrayList<>();
 
-				NestingCreator nestingCreator = new NestingCreator(xmlFilePath.getText(), mprPath.getText(),
+				NewNestingCreator nestingCreator = new NewNestingCreator(xmlFilePath.getText(), mprPath.getText(),
 						errorMessages, progressBar, checkParameter, sawingSeperate, options);
 				try {
 					txtrStatusBar.setText("Status: Processing..");
