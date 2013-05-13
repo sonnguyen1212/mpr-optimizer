@@ -29,6 +29,7 @@ import mpr.Point3D;
 import javax.swing.JList;
 import javax.swing.border.BevelBorder;
 import java.awt.Rectangle;
+import javax.swing.JCheckBox;
 
 public class CSVMaker {
 
@@ -41,6 +42,8 @@ public class CSVMaker {
 	private JList<String> list;
 	private File parentDir = null;
 	private File homeFolder;
+	private JTextField materialName;
+	private JCheckBox chckbxRotateAllowed;
 
 	/**
 	 * Launch the application.
@@ -118,7 +121,7 @@ public class CSVMaker {
 				JOptionPane.showMessageDialog(frmCsvMaker, "Processing Done.", "Done", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
-		btnSelectFiles.setBounds(80, 190, 204, 60);
+		btnSelectFiles.setBounds(80, 263, 204, 60);
 		frmCsvMaker.getContentPane().add(btnSelectFiles);
 
 		textField = new JTextField();
@@ -209,6 +212,19 @@ public class CSVMaker {
 		});
 		btnDelete.setBounds(294, 111, 80, 23);
 		frmCsvMaker.getContentPane().add(btnDelete);
+
+		chckbxRotateAllowed = new JCheckBox("Rotate Allowed?");
+		chckbxRotateAllowed.setBounds(10, 186, 126, 23);
+		frmCsvMaker.getContentPane().add(chckbxRotateAllowed);
+
+		JLabel lblMaterialName = new JLabel("Material Name");
+		lblMaterialName.setBounds(10, 216, 80, 23);
+		frmCsvMaker.getContentPane().add(lblMaterialName);
+
+		materialName = new JTextField();
+		materialName.setBounds(80, 217, 204, 20);
+		frmCsvMaker.getContentPane().add(materialName);
+		materialName.setColumns(10);
 	}
 
 	protected void processCSV() {
@@ -239,8 +255,17 @@ public class CSVMaker {
 				writer.print(point.getX() + ","); // Length
 				writer.print(point.getY() + ","); // Width
 				writer.print("1,"); // Qty
-				writer.print(","); // Rotate
-				writer.print(point.getZ() + ","); // Material
+				
+				if (chckbxRotateAllowed.isSelected())  // Rotate
+					writer.print("1,");
+				else
+					writer.print(","); 
+
+				if (materialName.getText().length()==0) // Material
+					writer.print(Double.parseDouble(point.getZ()) + ","); 
+				else
+					writer.print(materialName.getText() + ","); 
+
 				writer.print(fileName + ","); // PartCode
 				writer.print(","); // Top
 				writer.print(","); // Left
@@ -280,10 +305,10 @@ public class CSVMaker {
 				pw.close();
 			}
 			JOptionPane
-					.showMessageDialog(null,
-							"An error occured.\nLog has been saved to " + logFile.getAbsolutePath()
-									+ "\nPlease e-mail the file to us for maintance.", "Error!",
-							JOptionPane.ERROR_MESSAGE);
+			.showMessageDialog(null,
+					"An error occured.\nLog has been saved to " + logFile.getAbsolutePath()
+					+ "\nPlease e-mail the file to us for maintance.", "Error!",
+					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

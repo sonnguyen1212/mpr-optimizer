@@ -149,9 +149,9 @@ public class NestingGUI {
 						new JLabel("Please send an e-mail with the following address:"), macField, copyButton,
 						new JLabel("Enter your serial:"), serialField };
 
-				 JOptionPane.showMessageDialog(frame, inputs,
-				 "Serial Not Found", JOptionPane.WARNING_MESSAGE);
-				 serial = serialField.getText();
+				JOptionPane.showMessageDialog(frame, inputs,
+						"Serial Not Found", JOptionPane.WARNING_MESSAGE);
+				serial = serialField.getText();
 				int verificationResult = remoteVerifier.verify(serial);
 				if (verificationResult != LocalVerifier.LICENSE_MATCH) {
 					if (verificationResult == LocalVerifier.LICENSE_KEYS_DONT_MATCH) {
@@ -311,18 +311,28 @@ public class NestingGUI {
 				boolean sawingSeperate = ((String) sawingCombo.getSelectedItem()).matches("Seperate Machining") ? true
 						: false;
 				ArrayList<String> errorMessages = new ArrayList<>();
-
-				NewNestingCreator nestingCreator = new NewNestingCreator(xmlFilePath.getText(), mprPath.getText(),
-						errorMessages, progressBar, checkParameter, sawingSeperate, options);
 				try {
 					txtrStatusBar.setText("Status: Processing..");
-					nestingCreator.createLayoutMprs();
+
+					if (chckbxParameters.isSelected())
+					{
+						NewNestingCreator nestingCreator = new NewNestingCreator(xmlFilePath.getText(), mprPath.getText(),
+								errorMessages, progressBar, checkParameter, sawingSeperate, options);
+						nestingCreator.createLayoutMprs();
+
+					}
+					else
+					{
+						NestingCreator nestingCreator = new NestingCreator(xmlFilePath.getText(), mprPath.getText(),
+								errorMessages, progressBar, checkParameter, sawingSeperate, options);
+						nestingCreator.createLayoutMprs();
+
+					}
+
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(frame, "Unknown error occured, please contact support");
-					// write error
-					// log!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					writeException(e1);
+					writeException(e1); //write log
 				}
 				if (errorMessages.size() == 0) {
 					txtrStatusBar.setText("All Files Created Succesfully.");
@@ -440,7 +450,7 @@ public class NestingGUI {
 		sawingCombo = new JComboBox<>();
 		sawingCombo.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		sawingCombo.setModel(new DefaultComboBoxModel<String>(new String[] { "Seperate Machining",
-				"Nesting Machining" }));
+		"Nesting Machining" }));
 		sawingCombo.setBounds(188, 74, 183, 25);
 		panel.add(sawingCombo);
 	}
@@ -456,10 +466,10 @@ public class NestingGUI {
 				pw.close();
 			}
 			JOptionPane
-					.showMessageDialog(null,
-							"An error occured.\nLog has been saved to " + logFile.getAbsolutePath()
-									+ "\nPlease e-mail the file to us for maintance.", "Error!",
-							JOptionPane.ERROR_MESSAGE);
+			.showMessageDialog(null,
+					"An error occured.\nLog has been saved to " + logFile.getAbsolutePath()
+					+ "\nPlease e-mail the file to us for maintance.", "Error!",
+					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
