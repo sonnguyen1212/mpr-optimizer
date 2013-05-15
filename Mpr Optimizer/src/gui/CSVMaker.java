@@ -104,7 +104,7 @@ public class CSVMaker {
 		mprFiles = new ArrayList<>();
 		frmCsvMaker = new JFrame();
 		frmCsvMaker.setTitle("CSV Maker");
-		frmCsvMaker.setBounds(new Rectangle(200, 200, 400, 300));
+		frmCsvMaker.setBounds(new Rectangle(200, 200, 400, 400));
 		frmCsvMaker.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmCsvMaker.getContentPane().setLayout(null);
 
