@@ -91,6 +91,7 @@ public class NestingGUI {
 					} else {
 						window.localVerifyLicense();
 					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 					NestingGUI.writeException(e);

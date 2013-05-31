@@ -35,6 +35,33 @@ public class NewmprParser {
 			currentComp.add(newLine);
 		}
 	}
+	public static void reverseOpLineSide(ArrayList<String> currentComp)
+	{
+		int index=0;
+		String leftGoing = "RK=\"WRKL\"";
+		String rightGoing = "RK=\"WRKR\"";
+
+		for(String line : currentComp) {
+			Matcher mprMatcher = mprLine.matcher(line);
+			if (mprMatcher.find()) {
+				//if found relevant section for left/right going
+				if (mprMatcher.group(NestingCreator.PARAMETER_NAME).equals("RK")) 
+				{
+					//if was left - change to right
+					if (mprMatcher.group(NestingCreator.PARAMETER_VALUE).trim().equals("WRKL"))
+						currentComp.set(index, rightGoing);
+				
+					//if was right - change to left
+					if (mprMatcher.group(NestingCreator.PARAMETER_VALUE).trim().equals("WRKR"))
+						currentComp.set(index, leftGoing);
+					
+					//if was middle - don't touch.
+					break;
+				} 
+			}
+			index++;
+		}
+	}
 	
 	
 	public static boolean shouldFlip (MprFile currentMpr, ArrayList<String> header)

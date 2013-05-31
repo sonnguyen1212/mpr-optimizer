@@ -235,19 +235,13 @@ public class NewNestingCreator {
 						errorMsg.add("ERROR!!! Contouring and milling not the same size at file :" + currentMpr.getPartCode());
 
 					updateIndexesContours(contoursBreaked, currentContourIndex);
-					updateIndexesMilling(vertMilling, currentContourIndex);
+					updateIndexesMilling(vertMilling, currentContourIndex, shouldMirror);
 					currentContourIndex += contoursBreaked.size();
 
 					int index =0;
 					for (ArrayList<String> contour : contoursBreaked){
 						ArrayList<ArrayList<String>> currentContourBreaked = breakContours(contour, contourElementRegex);
-//						if (shouldFlip)
-//							for (int i=0 ; i<currentContourBreaked.size() ; i++)
-//								mprParser.flipXYContour(currentContourBreaked.get(i), Double.toString(currentMpr.getLength()));
-//
-//						if (xOffset>0 || yOffset>0)
-//							for (int i=0 ; i<currentContourBreaked.size() ; i++)
-//								mprParser.addOffsetToContour(currentContourBreaked.get(i), Double.toString(xOffset), Double.toString(yOffset));
+
 						//make change only for start point
 						NewmprParser.changeOpCS(currentContourBreaked.get(1), currentCSIndex, true);
 						contour = new ArrayList<String>();
@@ -299,12 +293,8 @@ public class NewNestingCreator {
 				//add relevant plate lines
 				for (ArrayList<String> operation : operationsBreaked){
 					NewmprParser.changeOpCS(operation, currentCSIndex, false);
-//					if (shouldFlip)
-//						mprParser.flipXY(operation, Double.toString(currentMpr.getLength()));
-//
-//					if (xOffset>0 || yOffset>0)
-//						mprParser.addOffsetToOperation(operation, Double.toString(xOffset), Double.toString(yOffset));
-
+					if (shouldMirror && !sawingSeperate)
+						NewmprParser.reverseOpLineSide(operation);
 				}
 
 				//check if should replace parameters
@@ -318,6 +308,7 @@ public class NewNestingCreator {
 				currentMprCount++;
 				currentCSIndex++;
 				progressBar.setValue(currentMprCount/mprCount*100);
+				progressBar.repaint();
 
 
 			}
@@ -352,12 +343,15 @@ public class NewNestingCreator {
 
 	}
 
-	private void updateIndexesMilling(ArrayList<ArrayList<String>> millings, int currentPlateIndex){
+	private void updateIndexesMilling(ArrayList<ArrayList<String>> millings, int currentPlateIndex, boolean shouldReversSide){
 		Pattern patt = Pattern.compile(millingOperationRegex);
 		Matcher matcher;
 		String currentLine;
 		for (ArrayList<String> currentMill : millings)
 		{
+			if (shouldReversSide)
+				NewmprParser.reverseOpLineSide(currentMill);
+
 			for (int line=0 ; line<currentMill.size() ; line++)
 			{
 				currentLine = currentMill.get(line);
