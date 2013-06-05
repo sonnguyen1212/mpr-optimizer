@@ -9,8 +9,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,7 +32,7 @@ public class XMLParser {
 	private static final String XML_DESCRIPTION = "Description";
 	private static final String XML_PART_LENGTH = "Length";
 	private static final String XML_PART_WIDTH = "Width";
-//	private static final String XML_PART_SECOND_PROG = "Notes";
+	//	private static final String XML_PART_SECOND_PROG = "Notes";
 	private static final String XML_REPLACEMENT_HEADER = "<?xml version=\"1.0\" encoding=\"Cp1252\"?>";
 
 	private String xmlFileName;
@@ -86,19 +84,32 @@ public class XMLParser {
 				for (int j = 0; j < layoutsNodeList.getLength(); j++) {
 					System.out.println("-Part " + j);
 					Element layoutElement = (Element) layoutsNodeList.item(j);
-					String partCode = getTextValue(layoutElement, XML_PARTCODE);
+					String rawPartCode = getTextValue(layoutElement, XML_PARTCODE);
 
 					// verify that this part has a cnc program
-					if (partCode == null)
+					if (rawPartCode == null)
 						continue;
-					else
-						partCode = partCode.trim() + ".mpr";
 
+					String partCode = null;
 					String secondPartCode = null;
-					if (partCode.contains("*")) {
-						secondPartCode = parseSecondPart(partCode);
-						partCode = parsePartCode(partCode);
-					}
+					//Algorithem to seperate the ***** if any
+					if (rawPartCode.contains("*")) {
+						//seperate the first
+						int startFirst, endFirst, startSecond, endSecond;
+						startFirst = rawPartCode.indexOf('*');
+						endFirst = rawPartCode.indexOf('*', startFirst+1);
+						partCode = (rawPartCode.substring(startFirst+1, endFirst)).trim() + ".mpr";
+
+						//search for the second
+						startSecond = rawPartCode.indexOf('*', endFirst+1);
+						if (startSecond!=-1){
+							endSecond = rawPartCode.indexOf('*', startSecond+1);
+							secondPartCode = (rawPartCode.substring(startSecond+1, endSecond)).trim() + ".mpr";
+						}
+
+					} else //just trim and add suffix
+						partCode = rawPartCode.trim() + ".mpr";
+
 					String description = getTextValue(layoutElement,
 							XML_DESCRIPTION);
 					String xOffsetString = getTextValue(layoutElement,
@@ -128,33 +139,6 @@ public class XMLParser {
 			newFile.delete();
 		}
 		return mprCount;
-	}
-
-	Pattern pattern = Pattern.compile("(\\*[^\\*]*\\*)\\s*(\\*[^\\*]*\\*)*");
-
-	private String parsePartCode(String partCode) {
-		Matcher matcher = pattern.matcher(partCode);
-		if (matcher.find()) {
-			if (matcher.groupCount() > 0) {
-				String temp = matcher.group(1);
-				temp = temp.replaceAll("\\*", "");
-				return temp;
-			}
-		}
-		return null;
-	}
-
-	private String parseSecondPart(String partCode) {
-		Matcher matcher = pattern.matcher(partCode);
-		if (matcher.find()) {
-			if (matcher.groupCount() > 1) {
-				System.out.println(matcher.groupCount());
-				String temp = matcher.group(2);
-				temp = temp.replaceAll("\\*", "");
-				return temp;
-			}
-		}
-		return null;
 	}
 
 	private String getTextValue(Element element, String tagName) {
