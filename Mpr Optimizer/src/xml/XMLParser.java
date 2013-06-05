@@ -9,6 +9,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,7 +34,7 @@ public class XMLParser {
 	private static final String XML_DESCRIPTION = "Description";
 	private static final String XML_PART_LENGTH = "Length";
 	private static final String XML_PART_WIDTH = "Width";
-	private static final String XML_PART_SECOND_PROG = "Notes";
+//	private static final String XML_PART_SECOND_PROG = "Notes";
 	private static final String XML_REPLACEMENT_HEADER = "<?xml version=\"1.0\" encoding=\"Cp1252\"?>";
 
 	private String xmlFileName;
@@ -85,13 +87,18 @@ public class XMLParser {
 					System.out.println("-Part " + j);
 					Element layoutElement = (Element) layoutsNodeList.item(j);
 					String partCode = getTextValue(layoutElement, XML_PARTCODE);
-					
-					//verify that this part has a cnc program
-					if (partCode==null)
+
+					// verify that this part has a cnc program
+					if (partCode == null)
 						continue;
 					else
 						partCode = partCode.trim() + ".mpr";
-					
+
+					String secondPartCode = null;
+					if (partCode.contains("*")) {
+						secondPartCode = parseSecondPart(partCode);
+						partCode = parsePartCode(partCode);
+					}
 					String description = getTextValue(layoutElement,
 							XML_DESCRIPTION);
 					String xOffsetString = getTextValue(layoutElement,
@@ -102,8 +109,8 @@ public class XMLParser {
 							XML_PART_LENGTH).replaceAll("[^\\d\\.]", "");
 					String partWidthString = getTextValue(layoutElement,
 							XML_PART_WIDTH).replaceAll("[^\\d\\.]", "");
-					String secondPartCode = getTextValue(layoutElement,
-							XML_PART_SECOND_PROG);
+					// String secondPartCode = getTextValue(layoutElement,
+					// XML_PART_SECOND_PROG);
 					double xOffset = Double.parseDouble(xOffsetString);
 					double yOffset = Double.parseDouble(yOffsetString);
 					double partLength = Double.parseDouble(partLengthString);
@@ -121,6 +128,33 @@ public class XMLParser {
 			newFile.delete();
 		}
 		return mprCount;
+	}
+
+	Pattern pattern = Pattern.compile("(\\*[^\\*]*\\*)\\s*(\\*[^\\*]*\\*)*");
+
+	private String parsePartCode(String partCode) {
+		Matcher matcher = pattern.matcher(partCode);
+		if (matcher.find()) {
+			if (matcher.groupCount() > 0) {
+				String temp = matcher.group(1);
+				temp = temp.replaceAll("\\*", "");
+				return temp;
+			}
+		}
+		return null;
+	}
+
+	private String parseSecondPart(String partCode) {
+		Matcher matcher = pattern.matcher(partCode);
+		if (matcher.find()) {
+			if (matcher.groupCount() > 1) {
+				System.out.println(matcher.groupCount());
+				String temp = matcher.group(2);
+				temp = temp.replaceAll("\\*", "");
+				return temp;
+			}
+		}
+		return null;
 	}
 
 	private String getTextValue(Element element, String tagName) {
