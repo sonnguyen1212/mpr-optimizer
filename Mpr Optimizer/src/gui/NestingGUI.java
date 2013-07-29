@@ -95,9 +95,9 @@ public class NestingGUI {
 					window.frame.setVisible(true);
 					boolean activated = (options.getProperty("activated") != null && options.getProperty("activated").equals("true")) ? true : false;
 					if (!activated) {
-						//	window.remoteVerifyLicense();
+						window.remoteVerifyLicense();
 					} else {
-						//window.localVerifyLicense();
+						window.localVerifyLicense();
 					}
 
 				} catch (Exception e) {
