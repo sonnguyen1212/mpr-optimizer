@@ -80,7 +80,7 @@ public class NestingGUI {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
+		JOptionPane.showMessageDialog(null, args.toString(), "Error!", JOptionPane.ERROR_MESSAGE);		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					NestingGUI window = new NestingGUI();
