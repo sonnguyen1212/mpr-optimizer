@@ -75,23 +75,31 @@ public class NestingGUI {
 	private JProgressBar progressBar;
 	private static OptionsManager options = null;
 	private static LocalVerifier localVerifier;
-
+	private static String xmlInitialPath="";
+	private static String mprInitialPath="";
+	private static boolean pathRecieved = false;
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		JOptionPane.showMessageDialog(null, args.toString(), "Error!", JOptionPane.ERROR_MESSAGE);		EventQueue.invokeLater(new Runnable() {
+		if (args.length>0 && args[0].contains(".xml"))
+		{
+			pathRecieved = true;
+			xmlInitialPath = args[0];
+			mprInitialPath=args[0].substring(0, args[0].lastIndexOf(File.separator)+1);
+		}
+		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					NestingGUI window = new NestingGUI();
 					window.frame.setVisible(true);
 					boolean activated = (options.getProperty("activated") != null && options.getProperty("activated").equals("true")) ? true : false;
 					if (!activated) {
-						window.remoteVerifyLicense();
+						//	window.remoteVerifyLicense();
 					} else {
-						window.localVerifyLicense();
+						//window.localVerifyLicense();
 					}
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 					NestingGUI.writeException(e);
@@ -211,6 +219,7 @@ public class NestingGUI {
 	 * Set default values.
 	 */
 	private void initializeFields() {
+
 		xmlFilePath.setText("");
 		mprPath.setText("");
 		btnGenerateNesting.setEnabled(false);
@@ -364,6 +373,15 @@ public class NestingGUI {
 		mprPath.setBounds(183, 91, 226, 28);
 		frame.getContentPane().add(mprPath);
 
+		if (pathRecieved==true)
+		{
+			xmlFilePath.setText(xmlInitialPath);
+			mprPath.setText(mprInitialPath);
+			isXMLFileSelected=true;
+			isMPRDestDirSelected=true;
+			btnGenerateNesting.setEnabled(true);
+
+		} 
 		btnXmlBrowse = new JButton("Browse");
 		btnXmlBrowse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
